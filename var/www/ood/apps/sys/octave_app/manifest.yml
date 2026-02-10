@@ -1,15 +1,13 @@
 ---
 name: Octave
-category: Mathematics & Computing 
+category: Interactive Apps
+subcategory: Scientific Tools
 role: batch_connect
 description: |
-  Launch a [GNU Octave] session on the [Vulcan] high-performance computing (HPC) cluster, operated by [AMII], the [University of Alberta], and supported by the [Digital Research Alliance of Canada].
-
+  Launch an [GNU Octave] session on the Eureka high-performance computing (HPC) cluster, operated by the [University of Alberta].
+  
   Octave is a high-level language for numerical computations. You will interact through a VNC session. GPU acceleration is available if selected.
 
   [GNU Octave]: https://www.gnu.org/software/octave/
-  [AMII]: https://www.amii.ca/
   [University of Alberta]: https://www.ualberta.ca/
-  [Digital Research Alliance of Canada]: https://alliancecan.ca/en
-  [Vulcan]: https://docs.alliancecan.ca/wiki/Vulcan
 
