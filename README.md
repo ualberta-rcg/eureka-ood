@@ -1,4 +1,4 @@
-# University of Alberta - Vulcan Open OnDemand Deployment  
+# University of Alberta - Eureka Open OnDemand Deployment  
 
 ![Ubuntu Version](https://img.shields.io/badge/Ubuntu-24.04+-green?style=flat-square)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
@@ -9,9 +9,9 @@
 
 ## Description
 
-This repository contains the complete configuration files, scripts, and application definitions for deploying **Open OnDemand (OOD) on the Vulcan HPC cluster** - a Digital Research Alliance of Canada compute resource operated by **[AMII (Alberta Machine Intelligence Institute)](https://www.amii.ca/)** and the **University of Alberta** as part of the PAICE (Platform for Advanced Infrastructure and Computing Excellence) initiative.
+This repository contains the complete configuration files, scripts, and application definitions for deploying **Open OnDemand (OOD) on the Eureka HPC cluster** - a Digital Research Alliance of Canada compute resource operated by **[AMII (Alberta Machine Intelligence Institute)](https://www.amii.ca/)** and the **University of Alberta** as part of the PAICE (Platform for Advanced Infrastructure and Computing Excellence) initiative.
 
-The project provides a production-ready, reproducible setup for OOD using Apache, OIDC authentication, and Let's Encrypt SSL. This repository serves as both a working deployment for Vulcan and a comprehensive template that can be adapted for other HPC clusters and institutions.
+The project provides a production-ready, reproducible setup for OOD using Apache, OIDC authentication, and Let's Encrypt SSL. This repository serves as both a working deployment for Eureka and a comprehensive template that can be adapted for other HPC clusters and institutions.
 
 **Key Features:**
 - **Production-ready OOD deployment** with OIDC authentication
@@ -25,9 +25,9 @@ The project provides a production-ready, reproducible setup for OOD using Apache
 
 <div align="center">
 
-![Vulcan Open OnDemand Dashboard](ood_screen.png)
+![Eureka Open OnDemand Dashboard](ood_screen.png)
 
-*The Vulcan Open OnDemand dashboard showing the available applications and cluster resources.*
+*The Eureka Open OnDemand dashboard showing the available applications and cluster resources.*
 
 </div>
 
@@ -65,7 +65,7 @@ To deploy this OOD configuration on your cluster:
 
 * [Open OnDemand Documentation](https://osc.github.io/ood-documentation/latest/)
 * [Digital Research Alliance of Canada](https://alliancecanada.ca/en)
-* [Vulcan Cluster Documentation](https://docs.alliancecanada.ca/wiki/Vulcan)
+* [Eureka Cluster Documentation](https://docs.alliancecanada.ca/wiki/Eureka)
 * [PAICE Platform](https://www.ualberta.ca/information-services-and-technology/research-computing/paice)
 * [CHPC OnDemand Apps v4](https://github.com/chpc-uofu/ood-ge-apps-v4) - Used as reference for application development and configuration
 
