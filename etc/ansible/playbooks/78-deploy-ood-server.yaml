@@ -77,7 +77,7 @@
 
     - name: Download OOD repo package
       get_url:
-        url: https://apt.osc.edu/ondemand/4.0/ondemand-release-web_4.0.0-noble_all.deb
+        url: https://apt.osc.edu/ondemand/4.1/ondemand-release-web_4.1.0-noble_all.deb
         dest: "{{ workdir }}/ondemand-release-web.deb"
         mode: '0644'
 
