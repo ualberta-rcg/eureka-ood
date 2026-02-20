@@ -1,5 +1,4 @@
 #!/bin/bash
-
 echo "[script.sh.erb] Starting OpenRefine Server"
 
 # Change to user's home directory
@@ -22,6 +21,10 @@ if [[ -z "${OPENREFINE_CMD}" || ! -x "${OPENREFINE_CMD}" ]]; then
 fi
 echo "[script.sh.erb] Using OpenRefine from CVMFS: $OPENREFINE_CMD"
 
+# Resolve hostname for binding and health checks
+REFINE_HOST="$(hostname)"
+echo "[script.sh.erb] Using hostname: ${REFINE_HOST}"
+
 # Set up OpenRefine environment
 export REFINE_PORT="${port}"
 export REFINE_DATA_DIR="${OPENREFINE_WORKDIR}"
@@ -32,10 +35,10 @@ OPENREFINE_CONFIG="${OPENREFINE_WORKDIR}/refine.ini"
 cat > "${OPENREFINE_CONFIG}" << EOF
 # OpenRefine Configuration for Open On Demand (CVMFS module)
 port=${port}
+host=${REFINE_HOST}
 data-dir=${OPENREFINE_WORKDIR}
 headless=true
 EOF
-
 echo "[script.sh.erb] OpenRefine configuration written to ${OPENREFINE_CONFIG}"
 
 # Launch OpenRefine Server
@@ -46,10 +49,10 @@ echo "[script.sh.erb] Logging to ${OPENREFINE_LOG_FILE}"
 nohup "${OPENREFINE_CMD}" \
   -p "${port}" \
   -d "${OPENREFINE_WORKDIR}" \
-  -x refine.headless=true \
+  -H "${REFINE_HOST}" \
   -i 0.0.0.0 \
+  -x refine.headless=true \
   > "${OPENREFINE_LOG_FILE}" 2>&1 &
-
 OPENREFINE_PID=$!
 echo "[script.sh.erb] OpenRefine started with PID: $OPENREFINE_PID"
 
