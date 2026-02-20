@@ -1,2 +1,1 @@
-OOD_SSHHOST_ALLOWLIST="rack[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]:vulcan1:vulcan2:rack*"
-
+OOD_SSHHOST_ALLOWLIST="eureka[1-9]:eureka[1-9][0-9]:eureka-login[1-9]:eureka-login[1-9][0-9]:eureka-amii-eng"
