@@ -13,6 +13,14 @@ if ! module load StdEnv/2023 openrefine/3.9.3; then
   exit 1
 fi
 
+# Resolve the IP on the 10.254.254.x network
+REFINE_INTERFACE_IP=$(ip -4 addr show bond0.1757 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+if [[ -z "${REFINE_INTERFACE_IP}" ]]; then
+  echo "[script.sh.erb] ERROR: Could not resolve IP for bond0.1757"
+  exit 1
+fi
+echo "[script.sh.erb] Binding to interface IP: ${REFINE_INTERFACE_IP}"
+
 # Resolve OpenRefine executable from module (CVMFS)
 OPENREFINE_CMD=$(command -v refine 2>/dev/null || true)
 if [[ -z "${OPENREFINE_CMD}" || ! -x "${OPENREFINE_CMD}" ]]; then
@@ -20,10 +28,6 @@ if [[ -z "${OPENREFINE_CMD}" || ! -x "${OPENREFINE_CMD}" ]]; then
   exit 1
 fi
 echo "[script.sh.erb] Using OpenRefine from CVMFS: $OPENREFINE_CMD"
-
-# Resolve hostname for binding and health checks
-REFINE_HOST="$(hostname)"
-echo "[script.sh.erb] Using hostname: ${REFINE_HOST}"
 
 # Set up OpenRefine environment
 export REFINE_PORT="${port}"
@@ -33,9 +37,8 @@ export REFINE_HEADLESS="true"
 # Create OpenRefine configuration
 OPENREFINE_CONFIG="${OPENREFINE_WORKDIR}/refine.ini"
 cat > "${OPENREFINE_CONFIG}" << EOF
-# OpenRefine Configuration for Open On Demand (CVMFS module)
 port=${port}
-host=${REFINE_HOST}
+host=${REFINE_INTERFACE_IP}
 data-dir=${OPENREFINE_WORKDIR}
 headless=true
 EOF
@@ -49,8 +52,8 @@ echo "[script.sh.erb] Logging to ${OPENREFINE_LOG_FILE}"
 nohup "${OPENREFINE_CMD}" \
   -p "${port}" \
   -d "${OPENREFINE_WORKDIR}" \
-  -H "${REFINE_HOST}" \
-  -i 0.0.0.0 \
+  -H "${REFINE_INTERFACE_IP}" \
+  -i "${REFINE_INTERFACE_IP}" \
   -x refine.headless=true \
   > "${OPENREFINE_LOG_FILE}" 2>&1 &
 OPENREFINE_PID=$!
