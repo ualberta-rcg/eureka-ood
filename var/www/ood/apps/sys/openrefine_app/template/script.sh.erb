@@ -1,13 +1,14 @@
 #!/bin/bash
 echo "[script.sh.erb] Starting OpenRefine Server"
 
-# Unset broken proxy
+# Unset broken proxy (squid hostname doesn't resolve on compute nodes)
 unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
 
+# Change to user's home directory
 cd "${HOME}"
 echo "[script.sh.erb] Changed working directory to ${HOME}"
 
-# Load required modules
+# Load required modules (CVMFS: openrefine/3.9.3 requires StdEnv/2023)
 echo "[script.sh.erb] Loading StdEnv/2023 and openrefine/3.9.3..."
 module purge
 if ! module load StdEnv/2023 openrefine/3.9.3; then
@@ -15,61 +16,59 @@ if ! module load StdEnv/2023 openrefine/3.9.3; then
   exit 1
 fi
 
-# Resolve the bind IP — try bond0.1757 first, fall back to hostname -I
-REFINE_INTERFACE_IP=$(ip -4 addr show bond0.1757 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
-if [[ -z "${REFINE_INTERFACE_IP}" ]]; then
-  REFINE_INTERFACE_IP=$(hostname -I | awk '{for(i=1;i<=NF;i++) if($i ~ /^10\.254\.254\./) print $i}')
-fi
-if [[ -z "${REFINE_INTERFACE_IP}" ]]; then
-  echo "[script.sh.erb] ERROR: Could not resolve IP on 10.254.254.x network"
-  exit 1
-fi
-echo "[script.sh.erb] Binding to interface IP: ${REFINE_INTERFACE_IP}"
-
-# Resolve OpenRefine executable
+# Resolve OpenRefine executable from module (CVMFS)
 OPENREFINE_CMD=$(command -v refine 2>/dev/null || true)
 if [[ -z "${OPENREFINE_CMD}" || ! -x "${OPENREFINE_CMD}" ]]; then
-  echo "[script.sh.erb] ERROR: 'refine' not found after loading openrefine/3.9.3."
+  echo "[script.sh.erb] ERROR: 'refine' not found after loading openrefine/3.9.3. PATH=$PATH"
   exit 1
 fi
 echo "[script.sh.erb] Using OpenRefine from CVMFS: $OPENREFINE_CMD"
 
-# Set environment variables (refine run reads these)
+# Set up OpenRefine environment variables
+# REFINE_INTERFACE=0.0.0.0 binds to all interfaces (same as Vulcan's -i 0.0.0.0)
+# No REFINE_HOST — so any Host header from OOD's reverse proxy is accepted
 export REFINE_PORT="${port}"
-export REFINE_HOST="${REFINE_INTERFACE_IP}"
-export REFINE_INTERFACE="${REFINE_INTERFACE_IP}"
+export REFINE_INTERFACE="0.0.0.0"
 export REFINE_DATA_DIR="${OPENREFINE_WORKDIR}"
 export REFINE_HEADLESS="true"
 
-# Write refine.ini to CWD (where refine looks for it)
+# Write refine.ini to $HOME (where 'refine run' looks for it)
+# No host= line — this is critical to avoid "Invalid hostname" from OOD's proxy
 cat > "${HOME}/refine.ini" << EOF
+# OpenRefine Configuration for Open OnDemand (Eureka)
 port=${port}
-host=${REFINE_INTERFACE_IP}
 data-dir=${OPENREFINE_WORKDIR}
 headless=true
 EOF
 echo "[script.sh.erb] refine.ini written to ${HOME}/refine.ini"
 
-# Launch OpenRefine using 'run' (foreground mode, no health-check wrapper)
-echo "[script.sh.erb] Launching OpenRefine on ${REFINE_INTERFACE_IP}:${port}..."
+# Launch OpenRefine Server
+echo "[script.sh.erb] Launching OpenRefine server on 0.0.0.0:${port}..."
 echo "[script.sh.erb] Logging to ${OPENREFINE_LOG_FILE}"
 
+# Use 'refine run' (foreground mode) to bypass the wrapper's built-in health check.
+# The health check does: start Java, then curl the URL — on Eureka this fails because
+# the proxy env vars break curl, causing "OpenRefine isn't running" and process death.
+# 'refine run' skips that check and runs Java directly.
+# No CLI flags — 'refine run' reads from env vars and refine.ini instead.
 nohup "${OPENREFINE_CMD}" run \
   > "${OPENREFINE_LOG_FILE}" 2>&1 &
 OPENREFINE_PID=$!
 echo "[script.sh.erb] OpenRefine started with PID: $OPENREFINE_PID"
 
-# Wait for startup
+# Wait for OpenRefine to start
 echo "[script.sh.erb] Waiting for OpenRefine to initialize..."
 sleep 15
 
+# Check if OpenRefine is still running
 if ! kill -0 $OPENREFINE_PID 2>/dev/null; then
   echo "[script.sh.erb] ERROR: OpenRefine process died. Check logs:"
   cat "${OPENREFINE_LOG_FILE}"
   exit 1
 fi
 
-echo "[script.sh.erb] OpenRefine Server Started on http://${REFINE_INTERFACE_IP}:${port}"
+echo "[script.sh.erb] OpenRefine Server Started successfully on port ${port}"
 
+# Keep the script running to maintain the OpenRefine process
 wait $OPENREFINE_PID
 echo "[script.sh.erb] OpenRefine Server exited."
