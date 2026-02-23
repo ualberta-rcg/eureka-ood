@@ -15,13 +15,6 @@ if [[ -f /etc/xdg/autostart/gdu-notification-daemon.desktop ]]; then
     > "${HOME}/.config/autostart/gdu-notification-daemon.desktop"
 fi
 
-# Set GNOME settings - disable screensaver and session idle
-gsettings set org.gnome.nautilus.preferences always-use-browser true
-gsettings set org.gnome.desktop.session idle-delay 0
-gsettings set org.gnome.desktop.screensaver lock-enabled false
-gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
-xset s off && xset -dpms && xset s noblank
-
 # Environment variables
 export XDG_CURRENT_DESKTOP=GNOME
 export GNOME_SHELL_SESSION_MODE=classic
@@ -36,6 +29,13 @@ export DISABLE_SYSTEMD=1
 eval "$(dbus-launch --sh-syntax --exit-with-session)"
 export DBUS_SESSION_BUS_ADDRESS
 export DBUS_SESSION_BUS_PID
+
+# Set GNOME settings - disable screensaver and session idle
+gsettings set org.gnome.nautilus.preferences always-use-browser true
+gsettings set org.gnome.desktop.session idle-delay 0
+gsettings set org.gnome.desktop.screensaver lock-enabled false
+gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
+xset s off && xset -dpms && xset s noblank
 
 echo "[gnome-session.sh] Launching minimal GNOME-lite session..."
 
