@@ -4,7 +4,7 @@ set -x
 
 OUTDIR="/etc/ood/config/apps/dashboard/initializers"
 OUTFILE="${OUTDIR}/paice_app_versions.rb"
-MODULE_USER="amiildapreader"
+MODULE_USER="clg_98da5933b7a1"
 
 mkdir -p "$OUTDIR"
 
