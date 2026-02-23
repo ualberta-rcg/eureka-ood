@@ -49,6 +49,7 @@ for app in \
   tracker-miner-user-guides \
   xfce4-power-manager \
   blueman \
+  xfce4-screensaver \  
   xfce-polkit; do
 
   desktop_file="${AUTOSTART}/${app}.desktop"
@@ -71,6 +72,14 @@ rm -f ~/.config/google-chrome/Singleton*
 
 # Define Chrome as Default Browswer
 xdg-settings set default-web-browser google-chrome.desktop
+
+# Disable screensaver and lock
+xfconf-query -c xfce4-screensaver -p /saver/enabled -n -t bool -s false
+xfconf-query -c xfce4-screensaver -p /lock/enabled -n -t bool -s false
+xfconf-query -c xfce4-screensaver -p /lock/saver-activation/enabled -n -t bool -s false
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/blank-on-ac -n -t int -s 0
+xfconf-query -c xfce4-power-manager -p /xfce4-power-manager/dpms-enabled -n -t bool -s false
+xset s off && xset -dpms && xset s noblank
 
 # Ensure xfce4-terminal launches as login shell
 TERM_CONFIG="${HOME}/.config/xfce4/terminal/terminalrc"
