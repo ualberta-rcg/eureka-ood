@@ -49,7 +49,7 @@ for app in \
   tracker-miner-user-guides \
   xfce4-power-manager \
   blueman \
-  xfce4-screensaver \  
+  xfce4-screensaver \
   xfce-polkit; do
 
   desktop_file="${AUTOSTART}/${app}.desktop"
