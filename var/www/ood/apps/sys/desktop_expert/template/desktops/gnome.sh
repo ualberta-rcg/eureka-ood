@@ -17,6 +17,10 @@ fi
 
 # Set GNOME settings - disable screensaver and session idle
 gsettings set org.gnome.nautilus.preferences always-use-browser true
+gsettings set org.gnome.desktop.session idle-delay 0
+gsettings set org.gnome.desktop.screensaver lock-enabled false
+gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
+xset s off && xset -dpms && xset s noblank
 
 # Environment variables
 export XDG_CURRENT_DESKTOP=GNOME
