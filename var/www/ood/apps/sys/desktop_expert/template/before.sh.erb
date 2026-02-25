@@ -11,7 +11,6 @@ echo "[before.sh.erb] User: $USER_NAME (UID: $USER_UID)"
 # Setup /run/user
 sudo /usr/local/bin/create-ice.sh "$USER_UID"
 
-
 # Set working dir for OOD (used by launch scripts like kde.sh)
 export OOD_DIR="${PWD}"
 
@@ -34,16 +33,22 @@ unset $(env | grep -o '^BASH_FUNC_.*%%' | cut -d= -f1)
 VGL_LIB_PATH="/usr/lib"
 GPU_PRESENT=$(nvidia-smi --query-gpu=name --format=csv,noheader,nounits 2>/dev/null | grep -v "^$" | head -n 1)
 
+# Clean CVMFS faker paths from LD_PRELOAD, replace with local versions
+LD_PRELOAD=$(echo "$LD_PRELOAD" | tr ':' '\n' | grep -v 'libdlfaker\|libvglfaker' | tr '\n' ':' | sed 's/:$//')
+
 if [[ -n "$GPU_PRESENT" && "$GPU_PRESENT" != "No devices were found" && -f "${VGL_LIB_PATH}/libdlfaker.so" && -f "${VGL_LIB_PATH}/libvglfaker.so" ]]; then
   export OOD_GPU_AVAILABLE=true
   export VGL_DISPLAY=egl
-  export LD_PRELOAD="libdlfaker.so:libvglfaker.so"
+  # Append local fakers cleanly
+  LD_PRELOAD="${LD_PRELOAD:+${LD_PRELOAD}:}${VGL_LIB_PATH}/libdlfaker.so:${VGL_LIB_PATH}/libvglfaker.so"
+  export LD_PRELOAD
   echo "[before.sh.erb] GPU detected: $GPU_PRESENT"
-  echo "[before.sh.erb] VirtualGL enabled"
+  echo "[before.sh.erb] VirtualGL enabled with local fakers: $LD_PRELOAD"
 else
   export OOD_GPU_AVAILABLE=false
   export LIBGL_ALWAYS_SOFTWARE=1
   export QT_QUICK_BACKEND=software
+  export LD_PRELOAD
   echo "[before.sh.erb] No GPU or VirtualGL missing — using software rendering"
 fi
 
