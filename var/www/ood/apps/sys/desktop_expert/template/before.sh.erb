@@ -37,7 +37,9 @@ LD_PRELOAD=$(echo "$LD_PRELOAD" | tr ':' '\n' | grep -v 'libdlfaker\|libvglfaker
 
 if [[ -n "$GPU_PRESENT" && "$GPU_PRESENT" != "No devices were found" && -f "${VGL_LIB_PATH}/libvglfaker-nodl.so" ]]; then
   export OOD_GPU_AVAILABLE=true
-  export VGL_DISPLAY=/dev/nvidia0
+  # Use the first GPU SLURM actually allocated to this job
+  GPU_INDEX=$(echo "$CUDA_VISIBLE_DEVICES" | cut -d',' -f1)
+  VGL_DISPLAY="/dev/nvidia${GPU_INDEX:-0}"
   export LD_PRELOAD="${VGL_LIB_PATH}/libvglfaker-nodl.so${LD_PRELOAD:+:${LD_PRELOAD}}"
   echo "[before.sh.erb] GPU detected: $GPU_PRESENT"
   echo "[before.sh.erb] VirtualGL enabled"
