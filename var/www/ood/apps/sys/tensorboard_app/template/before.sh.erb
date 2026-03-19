@@ -1,8 +1,5 @@
 #!/bin/bash
 
-JOB_DIR="$(pwd)"
-chmod +x "${JOB_DIR}/script.sh" 2>/dev/null || true
-
 echo "[before.sh.erb] Starting TensorBoard setup..."
 
 # Export the module function if available (script needs it for module load)
@@ -13,28 +10,7 @@ else
   echo "[before.sh.erb] WARNING: 'module' function not available."
 fi
 
-# Alliance CVMFS / module stack: use vulcan even though OOD is eureka.paice-ua.com
-export CC_CLUSTER=vulcan
-
-# Capture key paths
-USER_NAME="${USER:-$(whoami)}"
-JOB_DIR="$PWD"
-HOME_DIR="$HOME"
-echo "[before.sh.erb] USER_NAME: $USER_NAME"
-echo "[before.sh.erb] JOB_DIR: $JOB_DIR"
-echo "[before.sh.erb] HOME_DIR: $HOME_DIR"
-
-# Project root under home (Slurm default_account used for billing; no account field on form)
-PROJECT_ACCOUNT="default"
-export PROJECT_ROOT="/uhome/${USER_NAME}/projects/${PROJECT_ACCOUNT}"
-echo "[before.sh.erb] PROJECT_ROOT: ${PROJECT_ROOT}"
-mkdir -p "${PROJECT_ROOT}"
-
-# Use the node FQDN for OOD reverse proxy URLs
-export host="$(hostname -f)"
-echo "[before.sh.erb] host (FQDN for OOD proxy): ${host}"
-
-# Find available port to run TensorBoard on
+# Find available port to run server on
 export port=$(find_port ${host})
 if [[ -z "$port" ]]; then
   echo "[before.sh.erb] ERROR: Failed to allocate a port."
@@ -43,9 +19,24 @@ else
   echo "[before.sh.erb] Selected available port: $port"
 fi
 
-# Logs for TensorBoard
+# Needed for Alliance clusters
+export CC_CLUSTER=vulcan
+
+# Job dir (script / logs)
+export JOB_DIR="$PWD"
+echo "[before.sh.erb] JOB_DIR=${JOB_DIR}"
+
+# Paths (Slurm default_account used for billing when no account field drives this)
+USER_NAME="${USER:-$(whoami)}"
+echo "[before.sh.erb] USER_NAME: $USER_NAME"
+echo "[before.sh.erb] HOME: ${HOME}"
+
+PROJECT_ACCOUNT="default"
+export PROJECT_ROOT="/uhome/${USER_NAME}/projects/${PROJECT_ACCOUNT}"
+echo "[before.sh.erb] PROJECT_ROOT: ${PROJECT_ROOT}"
+mkdir -p "${PROJECT_ROOT}"
+
 export TENSORBOARD_LOG_FILE="${JOB_DIR}/tensorboard.log"
 echo "[before.sh.erb] TENSORBOARD_LOG_FILE: ${TENSORBOARD_LOG_FILE}"
 
 echo "[before.sh.erb] TensorBoard setup complete."
-

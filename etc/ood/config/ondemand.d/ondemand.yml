@@ -42,6 +42,15 @@ help_menu:
     icon: "fas://tasks"
     url: "https://docs.alliancecan.ca/wiki/Running_jobs"
 
+  # Custom dashboard pages (Slurm widgets under apps/dashboard)
+  - group: "Cluster metrics"
+  - title: "Metrics"
+    icon: "fas://chart-bar"
+    page: "metrics"
+  - title: "Partitions"
+    icon: "fas://chart-bar"
+    page: "partitions"
+
   # External tools and portals
   - group: "Tools and Portals"
   - title: "Alliance CCDB Portal"             # Compute Canada Database
@@ -96,6 +105,21 @@ dashboard_layout:
         widgets:
           - motd           # Message of the Day widget
           - pinned_apps    # Featured applications widget
+
+# Custom Help pages (merged last with shallow YAML merge — define both here)
+custom_pages:
+  metrics:
+    rows:
+      - columns:
+          - width: 8
+            widgets:
+              - "metrics/metrics"
+  partitions:
+    rows:
+      - columns:
+          - width: 4
+            widgets:
+              - "cluster/partitions"
 
 # =============================================================================
 # GLOBUS FILE TRANSFER INTEGRATION

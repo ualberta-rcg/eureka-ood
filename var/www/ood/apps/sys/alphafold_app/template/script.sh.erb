@@ -2,7 +2,9 @@
 
 echo "[script.sh.erb] Starting AlphaFold job for user: $USER"
 
-# Change to user's home directory
+# Unset broken proxy (squid hostname doesn't resolve on compute nodes)
+unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+
 cd "${HOME}"
 echo "[script.sh.erb] Changed working directory to ${HOME}"
 
@@ -16,32 +18,46 @@ EOF
 source "${JOB_DIR}/additional_env.sh"
 <% end %>
 
-echo "[script.sh.erb] Loading AlphaFold module stack (StdEnv/2020, GCC 9.3, CUDA 11.4, OpenMPI 4.0.3, Python 3.8, openmm-alphafold/7.5.1)..."
+echo "[script.sh.erb] Loading AlphaFold environment..."
 module purge
 
-# Required stack for openmm-alphafold/7.5.1 from CVMFS
-TARGET_ENV_MODULE="StdEnv/2020"
-TARGET_GCC_MODULE="gcc/9.3.0"
-TARGET_CUDA_MODULE="cuda/11.4"
-TARGET_OMPI_MODULE="openmpi/4.0.3"
-TARGET_PYTHON_MODULE="python/3.8"
-TARGET_AF_MODULE="openmm-alphafold/7.5.1"
+# Leaf module: spider reports the full prerequisite chain on Alliance-style stacks (same idea as RStudio Server)
+TARGET_AF_MODULE="${ALPHAFOLD_MODULE:-openmm-alphafold/7.5.1}"
 
-if module load "${TARGET_ENV_MODULE}" "${TARGET_GCC_MODULE}" "${TARGET_CUDA_MODULE}" "${TARGET_OMPI_MODULE}" "${TARGET_PYTHON_MODULE}" "${TARGET_AF_MODULE}"; then
-  echo "[script.sh.erb] Successfully loaded AlphaFold stack:"
-  echo "  ${TARGET_ENV_MODULE} ${TARGET_GCC_MODULE} ${TARGET_CUDA_MODULE} ${TARGET_OMPI_MODULE} ${TARGET_PYTHON_MODULE} ${TARGET_AF_MODULE}"
+if module load "${TARGET_AF_MODULE}"; then
+  echo "[script.sh.erb] Successfully loaded ${TARGET_AF_MODULE}"
 else
-  echo "[script.sh.erb] ERROR: Failed to load AlphaFold module stack."
-  echo "[script.sh.erb] Hint: verify StdEnv/2020, gcc/9.3.0, cuda/11.4, openmpi/4.0.3, python/3.8, and openmm-alphafold/7.5.1 are available."
-  exit 1
+  echo "[script.sh.erb] Initial load failed, checking prerequisites for ${TARGET_AF_MODULE}..."
+  ALL_MODULES=$(module spider "${TARGET_AF_MODULE}" 2>&1 | \
+                awk '/You will need to load all module\(s\)/, /This module provides/' | \
+                grep -Eo '[A-Za-z0-9_/-]+/[0-9.]+' | sort -u)
+  PREREQS=""
+  for mod in $ALL_MODULES; do
+    if [[ "$mod" != "${TARGET_AF_MODULE}" ]]; then
+      PREREQS="$PREREQS $mod"
+    fi
+  done
+  if [[ -n "$PREREQS" ]]; then
+    echo "[script.sh.erb] Detected prerequisites: $PREREQS"
+    module load $PREREQS
+    echo "[script.sh.erb] Retrying load of ${TARGET_AF_MODULE}..."
+    if module load "${TARGET_AF_MODULE}"; then
+      echo "[script.sh.erb] Successfully loaded ${TARGET_AF_MODULE} after prerequisites."
+    else
+      echo "[script.sh.erb] ERROR: Failed to load ${TARGET_AF_MODULE} even after prerequisites."
+      echo "[script.sh.erb] Hint: set ALPHAFOLD_MODULE or use Additional environment setup."
+      exit 1
+    fi
+  else
+    echo "[script.sh.erb] ERROR: No prerequisites found from module spider. Try: module spider ${TARGET_AF_MODULE}"
+    exit 1
+  fi
 fi
 
-# Resolve FASTA input path
 FASTA_FROM_FORM="<%= context.respond_to?(:fasta_path) ? context.fasta_path.to_s.strip : "" %>"
 
 if [[ -z "${FASTA_FROM_FORM}" ]]; then
   echo "[script.sh.erb] ERROR: No FASTA file specified."
-  echo "[script.sh.erb] Please provide a path in the 'FASTA file path' field."
   exit 1
 fi
 
@@ -52,7 +68,6 @@ fi
 
 export ALPHAFOLD_FASTA_PATH="${FASTA_FROM_FORM}"
 
-# Determine output directory
 OUTPUT_FROM_FORM="<%= context.respond_to?(:output_dir) ? context.output_dir.to_s.strip : "" %>"
 
 if [[ -n "${OUTPUT_FROM_FORM}" ]]; then
@@ -77,15 +92,12 @@ echo "[script.sh.erb] FASTA path: ${ALPHAFOLD_FASTA_PATH}"
 echo "[script.sh.erb] Output directory: ${ALPHAFOLD_OUTPUT_DIR}"
 echo "[script.sh.erb] Model preset: ${ALPHAFOLD_MODEL_PRESET}"
 
-# Allow admins/users to fully override the run command
 if [[ -n "${ALPHAFOLD_RUN_COMMAND}" ]]; then
-  echo "[script.sh.erb] Using ALPHAFOLD_RUN_COMMAND from environment:"
-  echo "  ${ALPHAFOLD_RUN_COMMAND}"
+  echo "[script.sh.erb] Using ALPHAFOLD_RUN_COMMAND from environment."
   eval "${ALPHAFOLD_RUN_COMMAND}"
   exit $?
 fi
 
-# Try to locate a reasonable default runner from the module installation.
 AF_ROOT="${EBROOTOPENMM_ALPHAFOLD:-${EBROOTALPHAFOLD:-""}}"
 
 if [[ -n "${AF_ROOT}" && -f "${AF_ROOT}/run_alphafold.py" ]]; then
@@ -95,14 +107,12 @@ if [[ -n "${AF_ROOT}" && -f "${AF_ROOT}/run_alphafold.py" ]]; then
     --output_dir=\"${ALPHAFOLD_OUTPUT_DIR}\" \
     --model_preset=\"${ALPHAFOLD_MODEL_PRESET}\""
 else
-  echo "[script.sh.erb] WARNING: Could not automatically detect run_alphafold.py from the module."
-  echo "[script.sh.erb] You may need to set ALPHAFOLD_RUN_COMMAND in 'Additional environment setup' to the correct invocation."
-  echo "[script.sh.erb] Example:"
-  echo "  export ALPHAFOLD_RUN_COMMAND=\"python3 /path/to/run_alphafold.py --fasta_paths='${ALPHAFOLD_FASTA_PATH}' --output_dir='${ALPHAFOLD_OUTPUT_DIR}' --model_preset='${ALPHAFOLD_MODEL_PRESET}'\""
+  echo "[script.sh.erb] ERROR: Could not find run_alphafold.py from the module."
+  echo "[script.sh.erb] Set ALPHAFOLD_RUN_COMMAND in Additional environment setup."
   exit 1
 fi
 
-echo "[script.sh.erb] Running AlphaFold with command:"
+echo "[script.sh.erb] Running AlphaFold:"
 echo "  ${RUN_CMD}"
 
 eval "${RUN_CMD}"
@@ -115,4 +125,3 @@ else
 fi
 
 exit ${EXIT_CODE}
-

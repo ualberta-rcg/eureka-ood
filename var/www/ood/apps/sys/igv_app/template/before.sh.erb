@@ -2,20 +2,20 @@
 
 echo "[before.sh.erb] Starting IGV setup..."
 
-# Export module if available
+# Export the module function if available (script needs it for module load)
 if [[ $(type -t module) == "function" ]]; then
+  echo "[before.sh.erb] 'module' function is available."
   export -f module
+else
+  echo "[before.sh.erb] WARNING: 'module' function not available."
 fi
 
-# Alliance CVMFS / module stack: use vulcan even though OOD is eureka.paice-ua.com
+# Needed for Alliance clusters
 export CC_CLUSTER=vulcan
 
-# Session dir (job cwd)
-SESSION_DIR="$(pwd)"
+# Job dir (VNC template: same naming as RStudio / other apps)
+export JOB_DIR="$PWD"
+export SESSION_DIR="$PWD"
+echo "[before.sh.erb] JOB_DIR=${JOB_DIR}"
 
-# Ensure main script is executable
-chmod +x "${SESSION_DIR}/script.sh" 2>/dev/null || true
-
-echo "[before.sh.erb] SESSION_DIR: ${SESSION_DIR}"
-echo "[before.sh.erb] Setup complete."
-
+echo "[before.sh.erb] IGV setup complete."
