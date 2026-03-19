@@ -1,13 +1,13 @@
 ---
-# Open OnDemand Portal Configuration for Vulcan HPC Cluster
-# This file configures the Apache web server settings and authentication for OOD
+# Open OnDemand Portal Configuration for Eureka HPC Cluster (PAICE)
+# OOD is served at eureka.paice-ua.com; OIDC may still use the Alliance Canada IdP.
 
 # =============================================================================
 # BASIC SERVER CONFIGURATION
 # =============================================================================
 
-# Primary hostname for the OOD web portal
-servername: vulcan.alliancecan.ca
+# Primary hostname for the OOD web portal (TLS cert and Apache vhost must match)
+servername: eureka.paice-ua.com
 
 # URI paths for compute node access (reverse proxy)
 node_uri: "/node"                    # Standard compute node access
@@ -27,7 +27,7 @@ auth:
   - "Require valid-user"              # Require authenticated users only
 
 # OIDC logout configuration
-logout_redirect: "https://idp.alliancecan.ca/idp/profile/Logout?return=https://alliancecan.ca"    # Redirect after logout
+logout_redirect: "https://idp.alliancecan.ca/idp/profile/Logout?return=https://eureka.paice-ua.com/"    # IdP return URL must be allowlisted with the provider
 
 # Per-user NGINX (PUN) pre-execution hooks
 pun_pre_hook_root_cmd: "/opt/ood/scripts/ood_pun_oidc_email.sh"  # Script to pass OIDC email to user's PUN
@@ -40,7 +40,7 @@ pun_pre_hook_exports: "OIDC_CLAIM_email"                        # Export OIDC em
 # OIDC endpoint and provider settings
 oidc_uri: "/oidc"                                                                  # OOD OIDC endpoint path
 oidc_provider_metadata_url: "https://idp.alliancecan.ca/.well-known/openid-configuration"  # Alliance Canada OIDC discovery
-oidc_client_id: "vulcan.alliancecan.ca"                                          # OIDC client identifier
+oidc_client_id: "eureka.paice-ua.com"                                              # OIDC client identifier (register this redirect URI with the IdP)
 oidc_client_secret: "OIDC_SECRET"                                                 # OIDC client secret (should be set via environment)
 
 # OIDC claims and scopes

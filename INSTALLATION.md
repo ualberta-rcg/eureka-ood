@@ -1,6 +1,6 @@
 # Installation Guide
 
-This document provides step-by-step instructions for installing Open OnDemand (OOD) on Ubuntu 24.04 for the Vulcan HPC cluster.
+This document provides step-by-step instructions for installing Open OnDemand (OOD) on Ubuntu 24.04 for the **Eureka** HPC cluster (University of Alberta / PAICE). The same steps apply when adapting this repository to another cluster—replace hostnames, cluster YAML, and OIDC settings as described in `CONFIGURATION.md`.
 
 ## Prerequisites
 
@@ -67,9 +67,9 @@ sudo systemctl restart apache2
 ### 1. Clone the Repository
 
 ```bash
-# Clone the Vulcan OOD configuration repository
-git clone https://github.com/your-org/vulcan-ood.git
-cd vulcan-ood
+# Clone the Eureka OOD configuration repository
+git clone https://github.com/your-org/eureka-ood.git
+cd eureka-ood
 ```
 
 ### 2. Set Executable Permissions Before Copying
@@ -155,7 +155,7 @@ sudo /opt/ood/cron/gen_app_rb.sh
 
 Edit the following files to match your cluster. **See `CONFIGURATION.md` for detailed examples and comments**:
 
-- **`/etc/ood/config/clusters.d/vulcan.yml`** - Rename to match your cluster
+- **`/etc/ood/config/clusters.d/eureka.yml`** - SLURM integration for Eureka (rename or add a file per cluster if you fork this repo)
   - Contains SLURM integration settings and host allowlist patterns
 - **`/etc/ood/config/ood_portal.yml`** - Update domain and OIDC settings
   - Contains Apache virtual host configuration with OIDC authentication
@@ -227,7 +227,7 @@ Execute the Ansible playbooks to configure desktop environments and applications
 
 ```bash
 # Install desktop environments and VirtualGL
-ansible-playbook /etc/ansible/playbooks/40-install-desktop-env.yaml
+ansible-playbook /etc/ansible/playbooks/40-install-desktop-env.yamls
 
 # Install Google Chrome
 ansible-playbook /etc/ansible/playbooks/41-install-chrome.yaml
@@ -285,7 +285,7 @@ sudo systemctl status apache2
 apache2ctl -M | grep openidc
 
 # Test web access
-curl -k https://your-ood-domain
+curl -k https://eureka.paice-ua.com   # production Eureka; use your hostname if adapting this repo
 ```
 
 ## Post-Installation

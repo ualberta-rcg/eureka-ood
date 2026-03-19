@@ -13,6 +13,8 @@ This repository contains the complete configuration files, scripts, and applicat
 
 The project provides a production-ready, reproducible setup for OOD using Apache, OIDC authentication, and Let's Encrypt SSL. This repository serves as both a working deployment for Eureka and a comprehensive template that can be adapted for other HPC clusters and institutions.
 
+**Live OOD URL:** [https://eureka.paice-ua.com/](https://eureka.paice-ua.com/) (PAICE domain; not `*.alliancecan.ca`).
+
 **Key Features:**
 - **Production-ready OOD deployment** with OIDC authentication
 - **Pre-configured applications** (Jupyter, RStudio, VS Code, MATLAB, ParaView, etc.)

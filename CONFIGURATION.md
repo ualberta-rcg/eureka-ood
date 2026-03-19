@@ -1,6 +1,10 @@
 # Configuration Guide
 
-This document outlines the key configuration files and settings for deploying Open OnDemand (OOD) on the Vulcan HPC cluster.
+This document outlines the key configuration files and settings for deploying Open OnDemand (OOD) on the **Eureka** HPC cluster. Examples use Eureka-oriented hostnames and paths; adjust every hostname, OIDC client ID, and allowlist for your environment.
+
+Eureka’s **Open OnDemand** web service is hosted on **`eureka.paice-ua.com`** (PAICE), not on `*.alliancecan.ca`. The Alliance Canada **IdP** (`https://idp.alliancecan.ca`) is used for OIDC; register redirect URIs and client ID for your PAICE hostname with whoever operates the IdP.
+
+Some interactive apps (e.g. Jupyter, OpenRefine) export **`CC_CLUSTER=vulcan`** in `before.sh.erb` so the Alliance **CVMFS / environment-modules** stack resolves the correct builds. That is independent of the OOD URL or cluster name in SLURM.
 
 ## Core Configuration Files
 
@@ -9,7 +13,7 @@ This document outlines the key configuration files and settings for deploying Op
 **Purpose**: Apache virtual host configuration with OIDC authentication
 
 **Key Settings**:
-- **Server**: `vulcan.alliancecan.ca`
+- **Server**: `eureka.paice-ua.com` (OOD vhost; must match DNS and TLS certificate)
 - **Authentication**: OpenID Connect via Alliance Canada
 - **SSL**: Custom certificate paths
 - **Session**: 8-hour timeout with optional Redis caching
@@ -23,18 +27,18 @@ This document outlines the key configuration files and settings for deploying Op
 
 **Note**: OIDC authentication requires SSSD (System Security Services Daemon) to be properly configured on all systems for user authentication and home directory mapping.
 
-### 2. Cluster Configuration (`/etc/ood/config/clusters.d/vulcan.yml`)
+### 2. Cluster Configuration (`/etc/ood/config/clusters.d/eureka.yml`)
 
 **Purpose**: SLURM cluster integration and job submission settings
 
 **Key Settings**:
 - **Scheduler**: SLURM with `/usr/bin/` binaries
-- **Login Host**: `vulcan.alliancecan.ca`
-- **Host Allowlist**: `rack*` and `vulcan*` nodes
+- **Login Host**: SSH/login hostname for SLURM (e.g. `eureka.paice-ua.com` or a dedicated login name from your site)
+- **Host Allowlist**: `rack*` compute nodes and Eureka login nodes (patterns depend on your naming scheme)
 - **Environment**: No shell environment copying
 
 **Required Changes for Deployment**:
-- **Rename file**: Change `vulcan.yml` to match your cluster name (e.g., `mycluster.yml`)
+- **Cluster YAML name**: Use `eureka.yml` for this cluster, or rename to match another cluster (e.g., `mycluster.yml`)
 - Update cluster title and login hostname
 - Modify host allowlist patterns for your nodes
 - Verify SLURM binary and config paths
@@ -93,8 +97,8 @@ This document outlines the key configuration files and settings for deploying Op
 **Purpose**: SSH host access control for shell application
 
 **Key Settings**:
-- **Host Allowlist**: Restricted to rack nodes and vulcan login nodes
-- **Pattern**: `rack[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]:vulcan1:vulcan2:rack*`
+- **Host Allowlist**: Restricted to rack nodes and Eureka login nodes (example pattern only)
+- **Pattern**: `rack[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]:eureka1:eureka2:rack*` (replace hostnames with your login nodes)
 
 **Required Changes for Deployment**:
 - Update host patterns to match your compute node naming
@@ -120,7 +124,7 @@ This document outlines the key configuration files and settings for deploying Op
 
 **Dual MOTD Setup**:
 - **`/etc/motd`** - System-wide MOTD displayed in terminal sessions
-  - ASCII art welcome message for Vulcan cluster
+  - ASCII art welcome message for Eureka cluster
   - Support contact information and portal links
 - **`/etc/ood/config/ondemand.d/motd`** - OOD dashboard MOTD
   - Markdown-formatted welcome message

@@ -1,0 +1,80 @@
+#!/bin/bash
+
+echo "[script.sh.erb] Starting TensorBoard for user: $USER"
+
+# Change to user's home directory (safe default)
+cd "${HOME}"
+echo "[script.sh.erb] Changed working directory to ${HOME}"
+
+# Run any user-specified "Additional environment setup" commands first.
+<% if context.respond_to?(:additional_environment) && context.additional_environment.present? %>
+echo "[script.sh.erb] Applying additional environment setup..."
+JOB_DIR="${JOB_DIR:-$(pwd)}"
+cat > "${JOB_DIR}/additional_env.sh" << 'EOF'
+<%= context.additional_environment %>
+EOF
+source "${JOB_DIR}/additional_env.sh"
+<% end %>
+
+# If a GPU was requested for this TensorBoard job, load CUDA toolkit so GPU-enabled TF envs can use it.
+<% if defined?(gpu_checkbox) && gpu_checkbox == "1" && defined?(gpu_type) && gpu_type && gpu_type != "none" %>
+echo "[script.sh.erb] GPU selected in form (type=<%= gpu_type %>); loading CUDA toolkit module cuda/12.9."
+module load cuda/12.9
+<% end %>
+
+echo "[script.sh.erb] Loading TensorBoard modules..."
+module purge
+
+TARGET_ENV_MODULE="StdEnv/2023"
+# Allow override via TENSORBOARD_MODULE, default to tensorboard/2.20.0
+TARGET_TENSORBOARD_MODULE="${TENSORBOARD_MODULE:-tensorboard/2.20.0}"
+
+if module load "${TARGET_ENV_MODULE}" "${TARGET_TENSORBOARD_MODULE}"; then
+  echo "[script.sh.erb] Successfully loaded ${TARGET_ENV_MODULE} and ${TARGET_TENSORBOARD_MODULE}"
+else
+  echo "[script.sh.erb] ERROR: Failed to load required modules: ${TARGET_ENV_MODULE} ${TARGET_TENSORBOARD_MODULE}"
+  echo "[script.sh.erb] Hint: set TENSORBOARD_MODULE in Additional environment setup if your module name differs."
+  exit 1
+fi
+
+TENSORBOARD_BIN="$(command -v tensorboard || true)"
+if [[ -z "${TENSORBOARD_BIN}" ]]; then
+  echo "[script.sh.erb] ERROR: 'tensorboard' executable not found in PATH after module load."
+  exit 1
+fi
+
+# Resolve log directory with sensible defaults:
+# 1) TENSORBOARD_LOGDIR from env
+# 2) logdir from form
+# 3) Per-account default under PROJECT_ROOT
+# 4) Fallback to $HOME/tensorboard-runs
+LOGDIR_FROM_FORM="<%= context.respond_to?(:logdir) ? context.logdir.to_s.strip : "" %>"
+
+if [[ -n "${TENSORBOARD_LOGDIR}" ]]; then
+  echo "[script.sh.erb] Using TENSORBOARD_LOGDIR from environment: ${TENSORBOARD_LOGDIR}"
+elif [[ -n "${LOGDIR_FROM_FORM}" ]]; then
+  export TENSORBOARD_LOGDIR="${LOGDIR_FROM_FORM}"
+  echo "[script.sh.erb] Using TENSORBOARD_LOGDIR from form: ${TENSORBOARD_LOGDIR}"
+elif [[ -n "${PROJECT_ROOT}" ]]; then
+  export TENSORBOARD_LOGDIR="${PROJECT_ROOT}/tensorboard-runs"
+  echo "[script.sh.erb] Using default TENSORBOARD_LOGDIR under PROJECT_ROOT: ${TENSORBOARD_LOGDIR}"
+else
+  export TENSORBOARD_LOGDIR="${HOME}/tensorboard-runs"
+  echo "[script.sh.erb] Using fallback TENSORBOARD_LOGDIR under HOME: ${TENSORBOARD_LOGDIR}"
+fi
+
+mkdir -p "${TENSORBOARD_LOGDIR}"
+
+echo "[script.sh.erb] Using tensorboard binary: ${TENSORBOARD_BIN}"
+echo "[script.sh.erb] TENSORBOARD_LOGDIR: ${TENSORBOARD_LOGDIR}"
+echo "[script.sh.erb] host (for OOD proxy): ${host}, port: ${port}"
+
+# Bind TensorBoard to all interfaces on the node; OOD proxies via FQDN host.
+"${TENSORBOARD_BIN}" \
+  --host "0.0.0.0" \
+  --port "${port}" \
+  --logdir "${TENSORBOARD_LOGDIR}" \
+  --load_fast true >> "${TENSORBOARD_LOG_FILE}" 2>&1
+
+echo "[script.sh.erb] TensorBoard process ended."
+

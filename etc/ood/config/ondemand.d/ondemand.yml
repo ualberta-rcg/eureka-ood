@@ -1,4 +1,4 @@
-# Vulcan Open OnDemand Dashboard Configuration
+# Eureka Open OnDemand Dashboard Configuration (PAICE — eureka.paice-ua.com)
 # This file customizes the appearance and behavior of the OOD web interface
 
 # =============================================================================
@@ -6,7 +6,7 @@
 # =============================================================================
 
 # Main dashboard title displayed in browser and interface
-dashboard_title: "Vulcan HPC Cluster"
+dashboard_title: "Eureka HPC Cluster (PAICE)"
 
 # University of Alberta logo in header navigation
 dashboard_header_img_logo: "/public/ualberta/logo.png"
@@ -32,9 +32,9 @@ custom_css_files:
 help_menu:
   # Documentation section
   - group: "Alliance Documentation"
-  - title: "Vulcan HPC Cluster Information"
+  - title: "Eureka HPC Cluster Information"
     icon: "fas://brain"
-    url: "https://docs.alliancecan.ca/wiki/Vulcan"
+    url: "https://docs.alliancecanada.ca/wiki/Eureka"
   - title: "Alliance - Getting Started"
     icon: "fas://rocket"
     url: "https://docs.alliancecan.ca/wiki/Getting_started"
@@ -47,9 +47,12 @@ help_menu:
   - title: "Alliance CCDB Portal"             # Compute Canada Database
     icon: "fas://database"
     url: "https://ccdb.alliancecan.ca/"
-  - title: "Vulcan's Trailblazing Turtle Portal"  # Vulcan-specific portal
+  - title: "Eureka user portal (PAICE)"
     icon: "fas://cogs"
-    url: "https://portal.vulcan.alliancecan.ca/"
+    url: "https://portal.eureka.paice-ua.com/"
+  - title: "Eureka Open OnDemand"
+    icon: "fas://window-maximize"
+    url: "https://eureka.paice-ua.com/"
 
   # Institutional links
   - group: "Links"
@@ -99,18 +102,18 @@ dashboard_layout:
 # =============================================================================
 
 # Globus endpoints for high-speed data transfer
-# All endpoints use the same Globus endpoint ID for Vulcan cluster
+# All endpoints use the same Globus endpoint ID for Eureka / PAICE (verify UUID in production)
 globus_endpoints:
   - path: "/home"                                        # User home directories
-    endpoint: "97bda3da-a723-4dc0-ba7e-728f35183b43"   # Vulcan Globus endpoint
+    endpoint: "97bda3da-a723-4dc0-ba7e-728f35183b43"   # Eureka Globus endpoint
     endpoint_path: "/home"
 
   - path: "/project"                                     # Shared project storage
-    endpoint: "97bda3da-a723-4dc0-ba7e-728f35183b43"   # Vulcan Globus endpoint
+    endpoint: "97bda3da-a723-4dc0-ba7e-728f35183b43"   # Eureka Globus endpoint
     endpoint_path: "/project"
 
   - path: "/scratch"                                     # High-speed temporary storage
-    endpoint: "97bda3da-a723-4dc0-ba7e-728f35183b43"   # Vulcan Globus endpoint
+    endpoint: "97bda3da-a723-4dc0-ba7e-728f35183b43"   # Eureka Globus endpoint
     endpoint_path: "/scratch"
 
 

@@ -1,0 +1,12 @@
+---
+name: IGV
+category: Interactive Apps
+subcategory: Data Tools
+role: batch_connect
+description: |
+  Launch [IGV (Integrative Genomics Viewer)] on the Eureka high-performance computing (HPC) cluster using the shared CVMFS software stack.
+
+  This app runs the IGV desktop application inside a VNC session on a Eureka compute node under your Slurm account. Use it to explore BAM/CRAM, VCF, and other genomics data interactively, with resources (cores, memory, GPU) scheduled by Slurm.
+
+  [IGV (Integrative Genomics Viewer)]: https://igv.org/
+

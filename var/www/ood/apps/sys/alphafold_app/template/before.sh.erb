@@ -1,0 +1,37 @@
+#!/bin/bash
+
+JOB_DIR="$(pwd)"
+chmod +x "${JOB_DIR}/script.sh" 2>/dev/null || true
+
+echo "[before.sh.erb] Starting AlphaFold setup..."
+
+# Export the module function if available (script needs it for module load)
+if [[ $(type -t module) == "function" ]]; then
+  echo "[before.sh.erb] 'module' function is available."
+  export -f module
+else
+  echo "[before.sh.erb] WARNING: 'module' function not available."
+fi
+
+# Alliance CVMFS / module stack: use vulcan even though OOD is eureka.paice-ua.com
+export CC_CLUSTER=vulcan
+
+# Capture key paths
+USER_NAME="${USER:-$(whoami)}"
+JOB_DIR="$PWD"
+HOME_DIR="$HOME"
+echo "[before.sh.erb] USER_NAME: $USER_NAME"
+echo "[before.sh.erb] JOB_DIR: $JOB_DIR"
+echo "[before.sh.erb] HOME_DIR: $HOME_DIR"
+
+# Per-account project root: /uhome/<user>/projects/<account>
+PROJECT_ACCOUNT="<%= context.account.to_s.strip %>"
+if [[ -z "${PROJECT_ACCOUNT}" ]]; then
+  PROJECT_ACCOUNT="default"
+fi
+export PROJECT_ROOT="/uhome/${USER_NAME}/projects/${PROJECT_ACCOUNT}"
+echo "[before.sh.erb] PROJECT_ROOT: ${PROJECT_ROOT}"
+mkdir -p "${PROJECT_ROOT}"
+
+echo "[before.sh.erb] AlphaFold setup complete."
+

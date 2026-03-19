@@ -1,0 +1,21 @@
+#!/bin/bash
+
+echo "[before.sh.erb] Starting IGV setup..."
+
+# Export module if available
+if [[ $(type -t module) == "function" ]]; then
+  export -f module
+fi
+
+# Alliance CVMFS / module stack: use vulcan even though OOD is eureka.paice-ua.com
+export CC_CLUSTER=vulcan
+
+# Session dir (job cwd)
+SESSION_DIR="$(pwd)"
+
+# Ensure main script is executable
+chmod +x "${SESSION_DIR}/script.sh" 2>/dev/null || true
+
+echo "[before.sh.erb] SESSION_DIR: ${SESSION_DIR}"
+echo "[before.sh.erb] Setup complete."
+

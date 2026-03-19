@@ -1,11 +1,11 @@
 # Repository Structure
 
-This repository contains the complete Open OnDemand (OOD) deployment configuration for the Vulcan HPC cluster. The structure mirrors the filesystem layout of a deployed OOD installation.
+This repository contains the complete Open OnDemand (OOD) deployment configuration for the **Eureka** HPC cluster (University of Alberta / PAICE). The structure mirrors the filesystem layout of a deployed OOD installation.
 
 ## Repository File Structure
 
 ```
-vulcan-ood/                                 # Repository root
+eureka-ood/                                 # Repository root
 ├── .git/                                  # Git version control
 ├── LICENSE                                # MIT License
 ├── README.md                              # Project overview
@@ -23,7 +23,7 @@ vulcan-ood/                                 # Repository root
 │   │       ├── nginx_stage.yml            # PUN environment variables
 │   │       ├── ood_portal.sha256sum      # Apache config checksum
 │   │       ├── clusters.d/
-│   │       │   └── vulcan.yml            # Vulcan cluster definition
+│   │       │   └── eureka.yml            # Eureka cluster definition (create on deploy if not vendored)
 │   │       ├── ondemand.d/
 │   │       │   └── ondemand.yml          # Dashboard customization
 │   │       ├── locales/                   # Internationalization
@@ -42,10 +42,11 @@ vulcan-ood/                                 # Repository root
 │   │           │               └── _logo.html.erb   # Logo template
 │   │           └── shell/
 │   │               └── env                # Shell app security settings
-│   └── ansible/                           # Ansible automation for compute hosts
-│       └── playbooks/                     # Self-configuring compute node playbooks
+│   └── ansible/                           # Ansible automation for compute / OOD hosts
+│       └── playbooks/                     # Playbooks (desktop env, Chrome, OOD server deploy)
 │           ├── 40-install-desktop-env.yamls # Desktop environment setup
-│           └── 41-install-chrome.yaml     # Google Chrome installation
+│           ├── 41-install-chrome.yaml     # Google Chrome installation
+│           └── 78-deploy-ood-server.yaml   # OOD portal server deployment (optional)
 │
 ├── opt/                                   # Optional software and scripts
 │   └── ood/
@@ -76,6 +77,7 @@ vulcan-ood/                                 # Repository root
 │           │       ├── afni_app/          # fMRI data analysis
 │           │       ├── vmd_app/           # Molecular visualization
 │           │       ├── octave_app/        # GNU Octave
+│           │       ├── openrefine_app/    # OpenRefine
 │           │       ├── desktop_expert/    # Remote desktop
 │           │       ├── shell/             # Terminal access
 │           │       └── myjobs/            # Job management
@@ -113,7 +115,7 @@ vulcan-ood/                                 # Repository root
   - MOTD (Message of the Day) integration
   - Locale settings (en-CA, fr-CA)
 
-- **`clusters.d/vulcan.yml`** - Vulcan cluster definition
+- **`clusters.d/eureka.yml`** - Eureka cluster definition
   - SLURM job scheduler configuration
   - Login node settings and host allowlist
   - Job submission and resource management
@@ -136,14 +138,14 @@ vulcan-ood/                                 # Repository root
   - `fr-CA.yml` - French (Canada) translations
 
 - **`ondemand.d/ondemand.yml`** - Dashboard configuration
-  - Custom branding and styling (Vulcan HPC Cluster theme)
+  - Custom branding and styling (Eureka HPC Cluster theme)
   - Help menu with external links (Alliance docs, support, tools)
   - Pinned applications configuration (shell, myjobs, desktop, dev tools)
   - Dashboard layout and widgets
   - Globus file transfer endpoints (`/home`, `/project`, `/scratch`)
 
 - **`ondemand.d/motd`** - Message of the Day for dashboard
-  - Welcome message for Vulcan platform
+  - Welcome message for Eureka platform
   - Support contact information
 
 ### Compute Node Automation (`/etc/ansible/`)
@@ -161,13 +163,17 @@ vulcan-ood/                                 # Repository root
   - Provides web browser access for remote desktop sessions
   - Enables web-based applications and tools
 
+- **`78-deploy-ood-server.yaml`** - OOD portal server deployment (optional)
+  - Use when provisioning the web front-end host; complements compute-node playbooks
+
 #### Web Applications (`/var/www/ood/apps/sys/`)
 Pre-configured interactive applications:
 
-##### Development & Data Science (3 apps)
+##### Development & Data Science (4 apps)
 - **`jupyter_app/`** - JupyterLab server for interactive computing
 - **`rstudio_server_app/`** - RStudio Server for R development
 - **`vs_code_html_app/`** - VS Code Server for web-based development
+- **`openrefine_app/`** - OpenRefine data wrangling (CVMFS modules)
 
 ##### Mathematics & Computing (2 apps)
 - **`matlab_app/`** - MATLAB numerical computing environment
@@ -238,7 +244,7 @@ Reusable template components for application forms:
 
 #### System Messages (`/etc/`)
 - **`motd`** - Message of the Day
-  - Welcome message for Vulcan cluster
+  - Welcome message for Eureka cluster
   - Support contact information and portal links
 
 ## Compute Node Infrastructure

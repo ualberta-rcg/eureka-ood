@@ -1,6 +1,6 @@
 # OpenRefine App for Open On Demand
 
-This directory contains the OpenRefine application configuration for Open On Demand, allowing users to run OpenRefine instances on the Vulcan HPC cluster.
+This directory contains the OpenRefine application configuration for Open On Demand, allowing users to run OpenRefine instances on the **Eureka** HPC cluster.
 
 ## Overview
 
