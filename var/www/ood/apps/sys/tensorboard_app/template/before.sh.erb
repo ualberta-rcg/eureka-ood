@@ -22,21 +22,30 @@ fi
 # Needed for Alliance clusters
 export CC_CLUSTER=vulcan
 
-# Job dir (script / logs)
 export JOB_DIR="$PWD"
 echo "[before.sh.erb] JOB_DIR=${JOB_DIR}"
 
-# Paths (Slurm default_account used for billing when no account field drives this)
-USER_NAME="${USER:-$(whoami)}"
-echo "[before.sh.erb] USER_NAME: $USER_NAME"
-echo "[before.sh.erb] HOME: ${HOME}"
-
-PROJECT_ACCOUNT="default"
-export PROJECT_ROOT="/uhome/${USER_NAME}/projects/${PROJECT_ACCOUNT}"
-echo "[before.sh.erb] PROJECT_ROOT: ${PROJECT_ROOT}"
-mkdir -p "${PROJECT_ROOT}"
-
 export TENSORBOARD_LOG_FILE="${JOB_DIR}/tensorboard.log"
 echo "[before.sh.erb] TENSORBOARD_LOG_FILE: ${TENSORBOARD_LOG_FILE}"
+
+LOGDIR_FROM_FORM="<%= context.respond_to?(:logdir) ? context.logdir.to_s.strip : "" %>"
+if [[ -n "${LOGDIR_FROM_FORM}" ]]; then
+  export TENSORBOARD_LOGDIR="${LOGDIR_FROM_FORM}"
+  echo "[before.sh.erb] TENSORBOARD_LOGDIR from form: ${TENSORBOARD_LOGDIR}"
+elif [[ -n "${TENSORBOARD_LOGDIR}" ]]; then
+  echo "[before.sh.erb] TENSORBOARD_LOGDIR from environment: ${TENSORBOARD_LOGDIR}"
+else
+  export TENSORBOARD_LOGDIR="${JOB_DIR}/runs"
+  echo "[before.sh.erb] TENSORBOARD_LOGDIR default (session runs): ${TENSORBOARD_LOGDIR}"
+fi
+
+if [[ -e "${TENSORBOARD_LOGDIR}" && ! -d "${TENSORBOARD_LOGDIR}" ]]; then
+  echo "[before.sh.erb] ERROR: Not a directory: ${TENSORBOARD_LOGDIR}"
+  exit 1
+fi
+if ! mkdir -p "${TENSORBOARD_LOGDIR}"; then
+  echo "[before.sh.erb] ERROR: Cannot create directory: ${TENSORBOARD_LOGDIR}"
+  exit 1
+fi
 
 echo "[before.sh.erb] TensorBoard setup complete."

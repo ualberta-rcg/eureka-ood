@@ -10,7 +10,7 @@ gpu_data = {
   "gpu_max_counts" => CustomGPUInfo.gpu_max_counts.transform_keys(&:to_s)
 }
 
-# Application-specific minimum resource requirements for AlphaFold
+# Application-specific minimum resource requirements
 min_cores = 8
 min_mem_gb = 16
 %>
@@ -61,22 +61,13 @@ attributes:
     options:
       - "<%= CustomClusterInfo.cluster_name %>"
 
-  # Slurm account to bill (optional; if omitted, Slurm default_account is used)
-  account:
-    widget: select
-    label: Account
-    options:
-<%  account_options.each do |acct| %>
-      - "<%= acct %>"
-<%  end %>
-
   # FASTA path for input sequence(s)
   fasta_path:
     widget: text_field
     label: "FASTA file path"
     help: |
       Absolute path to the FASTA file containing one or more protein sequences.
-      Example: /uhome/$USER/projects/$ACCOUNT/alphafold/input/example.fasta
+      Example: /uhome/$USER/projects/default/alphafold/input/example.fasta
 
   # Optional explicit output directory
   output_dir:
@@ -84,7 +75,7 @@ attributes:
     label: "Output directory (optional)"
     help: |
       Directory where AlphaFold outputs (PDBs, logs) will be written.
-      If left blank, a per-job directory will be created under /uhome/$USER/projects/$ACCOUNT/alphafold-runs/.
+      If left blank, a per-job directory will be created under your project path or home.
 
   # Model preset
   model_preset:
@@ -96,7 +87,7 @@ attributes:
       - [ "monomer_casp14", "monomer_casp14" ]
       - [ "multimer", "multimer" ]
 
-# Import common job parameters from template (cores, hours, email, etc.)
+# Import common job parameters from template (cores, hours, email, VNC resolution, etc.)
 <% IO.foreach(template_root+"job_params") do |line| %><%= line %><% end %>
 
   # Force memory customization to be enabled for this application
@@ -116,6 +107,5 @@ form:
   - cpunum                    # Hidden: max CPUs available
   - mincpu                    # Hidden: minimum CPUs required
   - minram                    # Hidden: minimum memory required
-# Import form fields from template (CPU cores, memory, GPU options, additional env, etc.)
+# Import form fields from template (CPU cores, memory, GPU options, VNC settings, etc.)
 <% IO.foreach(template_root+"form_params") do |line| %><%= line %><% end %>
-

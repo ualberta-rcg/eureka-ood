@@ -61,15 +61,6 @@ attributes:
     options:
       - "<%= CustomClusterInfo.cluster_name %>"
 
-  # Slurm account to bill (optional; if omitted, Slurm default_account is used)
-  account:
-    widget: select
-    label: Account
-    options:
-<%  account_options.each do |acct| %>
-      - "<%= acct %>"
-<%  end %>
-
 # Import common job parameters from template (cores, hours, email, VNC resolution, etc.)
 <% IO.foreach(template_root+"job_params") do |line| %><%= line %><% end %>
 
@@ -87,6 +78,5 @@ form:
   - cpunum                    # Hidden: max CPUs available
   - mincpu                    # Hidden: minimum CPUs required
   - minram                    # Hidden: minimum memory required
-# Import form fields from template with environment options (CPU cores, memory, GPU, additional env, VNC settings, etc.)
-<% IO.foreach(template_root+"form_params_env") do |line| %><%= line %><% end %>
-
+# Import form fields from template (CPU cores, memory, GPU options, VNC settings, etc.)
+<% IO.foreach(template_root+"form_params") do |line| %><%= line %><% end %>

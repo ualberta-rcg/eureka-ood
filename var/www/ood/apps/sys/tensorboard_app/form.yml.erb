@@ -61,24 +61,12 @@ attributes:
     options:
       - "<%= CustomClusterInfo.cluster_name %>"
 
-  # Slurm account to bill (optional; if omitted, Slurm default_account is used)
-  account:
-    widget: select
-    label: Account
-    options:
-<%  account_options.each do |acct| %>
-      - "<%= acct %>"
-<%  end %>
-
-  # TensorBoard log directory (where event files live)
   logdir:
     widget: text_field
     label: "TensorBoard log directory"
-    help: |
-      Absolute path to the directory containing TensorBoard event files.
-      Example: /uhome/$USER/projects/$ACCOUNT/runs
+    help: "Absolute path passed to --logdir (directory with event files). Leave blank to use a runs folder in this session’s job directory."
 
-# Import common job parameters from template (cores, hours, email, etc.)
+# Import common job parameters from template (cores, hours, email, VNC resolution, etc.)
 <% IO.foreach(template_root+"job_params") do |line| %><%= line %><% end %>
 
   # Force memory customization to be enabled for this application
@@ -91,11 +79,10 @@ attributes:
 form:
   - cluster                    # Cluster selection
   - bc_num_hours              # Job runtime limit
-  - logdir                     # TensorBoard log directory
+  - logdir                    # TensorBoard --logdir
   - memorydata                # Hidden: max memory available
   - cpunum                    # Hidden: max CPUs available
   - mincpu                    # Hidden: minimum CPUs required
   - minram                    # Hidden: minimum memory required
-# Import form fields from template (CPU cores, memory, GPU options, additional env, etc.)
+# Import form fields from template (CPU cores, memory, GPU options, VNC settings, etc.)
 <% IO.foreach(template_root+"form_params") do |line| %><%= line %><% end %>
-

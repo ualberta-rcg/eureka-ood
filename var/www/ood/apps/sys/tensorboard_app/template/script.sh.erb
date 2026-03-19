@@ -66,21 +66,10 @@ if [[ -z "${TENSORBOARD_BIN}" ]]; then
   exit 1
 fi
 
-LOGDIR_FROM_FORM="<%= context.respond_to?(:logdir) ? context.logdir.to_s.strip : "" %>"
-
-if [[ -n "${TENSORBOARD_LOGDIR}" ]]; then
-  echo "[script.sh.erb] Using TENSORBOARD_LOGDIR from environment: ${TENSORBOARD_LOGDIR}"
-elif [[ -n "${LOGDIR_FROM_FORM}" ]]; then
-  export TENSORBOARD_LOGDIR="${LOGDIR_FROM_FORM}"
-  echo "[script.sh.erb] Using TENSORBOARD_LOGDIR from form: ${TENSORBOARD_LOGDIR}"
-elif [[ -n "${PROJECT_ROOT}" ]]; then
-  export TENSORBOARD_LOGDIR="${PROJECT_ROOT}/tensorboard-runs"
-  echo "[script.sh.erb] Using default TENSORBOARD_LOGDIR under PROJECT_ROOT: ${TENSORBOARD_LOGDIR}"
-else
-  export TENSORBOARD_LOGDIR="${HOME}/tensorboard-runs"
-  echo "[script.sh.erb] Using fallback TENSORBOARD_LOGDIR under HOME: ${TENSORBOARD_LOGDIR}"
+if [[ -z "${TENSORBOARD_LOGDIR}" ]]; then
+  echo "[script.sh.erb] ERROR: TENSORBOARD_LOGDIR is unset (before.sh should have set it)."
+  exit 1
 fi
-
 mkdir -p "${TENSORBOARD_LOGDIR}"
 
 echo "[script.sh.erb] Using tensorboard binary: ${TENSORBOARD_BIN}"
