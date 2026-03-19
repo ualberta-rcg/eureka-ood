@@ -1,3 +1,4 @@
+# SMTP: smtp.ualberta.ca:25, STARTTLS, no auth (same pattern as campus relay / sarek reports).
 support_ticket:
   description: |
     Submit a support request for Eureka Open OnDemand. Include steps to reproduce,
@@ -8,15 +9,13 @@ support_ticket:
     max_size: 6291456
 
   email:
+    from: "ood@eureka.ualberta.ca"
     to: "rschsppt+eureka@ualberta.ca"
     delivery_method: "smtp"
     delivery_settings:
-      address: "smtp.example.org"
-      port: 587
-      domain: "paice-ua.com"
-      user_name: "smtp_user"
-      password: "smtp_password"
-      authentication: "login"
+      address: "smtp.ualberta.ca"
+      port: 25
+      domain: "ualberta.ca"
       enable_starttls_auto: true
       open_timeout: 15
       read_timeout: 15
