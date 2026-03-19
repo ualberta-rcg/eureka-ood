@@ -24,11 +24,8 @@ echo "[before.sh.erb] USER_NAME: $USER_NAME"
 echo "[before.sh.erb] JOB_DIR: $JOB_DIR"
 echo "[before.sh.erb] HOME_DIR: $HOME_DIR"
 
-# Per-account project root: /uhome/<user>/projects/<account>
-PROJECT_ACCOUNT="<%= context.account.to_s.strip %>"
-if [[ -z "${PROJECT_ACCOUNT}" ]]; then
-  PROJECT_ACCOUNT="default"
-fi
+# Project root under home (Slurm default_account used for billing; no account field on form)
+PROJECT_ACCOUNT="default"
 export PROJECT_ROOT="/uhome/${USER_NAME}/projects/${PROJECT_ACCOUNT}"
 echo "[before.sh.erb] PROJECT_ROOT: ${PROJECT_ROOT}"
 mkdir -p "${PROJECT_ROOT}"

@@ -6,11 +6,7 @@ batch_connect:
   template: "basic"
 
 script:
-  job_name: "tensorboard"
   cluster: "<%= cluster %>"
-  <% if defined?(account) && account.present? %>
-  accounting_id: "<%= account %>"
-  <% end %>
   <% if defined?(bc_email_on_started) && bc_email_on_started == "1" && emailaddr != "" %>
   email: <%= emailaddr.inspect %>
   <% end %>

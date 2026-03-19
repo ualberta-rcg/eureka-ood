@@ -10,10 +10,6 @@ gpu_data = {
   "gpu_max_counts" => CustomGPUInfo.gpu_max_counts.transform_keys(&:to_s)
 }
 
-# Slurm account list for the current user (for billing/fairshare)
-current_user = OodSupport::User.new.name rescue ENV["USER"]
-account_options = CustomAccountInfo.accounts_for(current_user)
-
 # Application-specific minimum resource requirements for AlphaFold
 min_cores = 8
 min_mem_gb = 16
@@ -112,7 +108,6 @@ attributes:
 # Form field display order and layout
 form:
   - cluster                    # Cluster selection
-  - account                    # Slurm account / billing
   - bc_num_hours              # Job runtime limit
   - fasta_path                # Input FASTA
   - output_dir                # Optional output directory

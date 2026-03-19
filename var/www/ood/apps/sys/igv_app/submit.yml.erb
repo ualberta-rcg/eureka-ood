@@ -7,11 +7,7 @@ batch_connect:
   websockify_cmd: "/cvmfs/soft.computecanada.ca/gentoo/2023/x86-64-v3/usr/bin/websockify"
 
 script:
-  job_name: "igv"
   cluster: "<%= cluster %>"
-  <% if defined?(account) && account.present? %>
-  accounting_id: "<%= account %>"
-  <% end %>
   <% if defined?(bc_email_on_started) && bc_email_on_started == "1" && emailaddr != "" %>
   email: <%= emailaddr.inspect %>
   <% end %>
