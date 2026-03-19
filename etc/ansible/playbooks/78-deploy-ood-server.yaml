@@ -55,6 +55,7 @@
           - git
           - ca-certificates
           - apt-transport-https
+          - sssd-tools
 
           # Web server and authentication
           - apache2
@@ -291,6 +292,31 @@
         mode: '0755'
 
     ############################################################################
+    # PHASE 13: Module Discovery for OOD Dashboard
+    ############################################################################
+    # Generate Lmod spider JSON so OOD can display available software modules
+
+    - name: Ensure OOD modules directory exists
+      file:
+        path: /ood/modules
+        state: directory
+        mode: '0755'
+
+    - name: Generate Lmod spider JSON for OOD module list
+      shell: >
+        /cvmfs/soft.computecanada.ca/custom/software/lmod/lmod/libexec/spider
+        -o spider-json
+        /cvmfs/soft.computecanada.ca/easybuild/modules/2023/x86-64-v3/Core:/cvmfs/soft.computecanada.ca/custom/modules
+        > /ood/modules/eureka.json
+      args:
+        creates: /ood/modules/eureka.json
+
+    - name: Set permissions on module JSON
+      file:
+        path: /ood/modules/eureka.json
+        mode: '0644'
+
+    ############################################################################
     # PHASE 12: OOD Regeneration and Cleanup
     ############################################################################
     # Clean stale nginx configurations and regenerate portal config
@@ -318,3 +344,12 @@
       systemd:
         name: apache2
         state: restarted
+
+    ############################################################################
+    # PHASE 14: Autofs for per-user home mounts
+    ############################################################################
+    - name: Ensure autofs is enabled and running
+      systemd:
+        name: autofs
+        state: restarted
+        enabled: yes
