@@ -21,11 +21,6 @@ source "${JOB_DIR}/additional_env.sh"
 echo "[script.sh.erb] Loading TensorBoard modules..."
 module purge
 
-<% if defined?(gpu_checkbox) && gpu_checkbox == "1" && defined?(gpu_type) && gpu_type && gpu_type != "none" %>
-echo "[script.sh.erb] GPU selected in form (type=<%= gpu_type %>); loading CUDA toolkit module cuda/12.9."
-module load cuda/12.9
-<% end %>
-
 TARGET_ENV_MODULE="StdEnv/2023"
 TARGET_TENSORBOARD_MODULE="${TENSORBOARD_MODULE:-tensorboard/2.20.0}"
 

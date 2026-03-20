@@ -3,13 +3,6 @@
 app_name = "TensorBoard"
 template_root = "/var/www/ood/apps/templates/"
 
-# GPU configuration data passed to JavaScript for dynamic form behavior
-gpu_data = {
-  "gpu_types" => CustomGPUInfo.gpu_types,
-  "gpu_name_mappings" => CustomGPUInfo.gpu_name_mappings.transform_keys(&:to_s),
-  "gpu_max_counts" => CustomGPUInfo.gpu_max_counts.transform_keys(&:to_s)
-}
-
 # Application-specific minimum resource requirements (align with other lightweight server apps, e.g. OpenRefine)
 min_cores = 2
 min_mem_gb = 4
@@ -24,12 +17,6 @@ title: <%= app_name %>
 
 # Form field definitions and configuration
 attributes:
-  # Hidden field containing GPU information for JavaScript form logic
-  gpudata:
-    widget: hidden_field
-    cacheable: false
-    value: "<%= gpu_data.to_json.gsub('"','\\"') %>"
-
   # Hidden field with cluster's maximum memory per node for validation
   memorydata:
     widget: hidden_field
@@ -110,5 +97,9 @@ form:
   - cpunum                    # Hidden: max CPUs available
   - mincpu                    # Hidden: minimum CPUs required
   - minram                    # Hidden: minimum memory required
-# Import form fields from template (CPU cores, memory, GPU options, VNC settings, etc.)
-<% IO.foreach(template_root+"form_params") do |line| %><%= line %><% end %>
+  - num_cores
+  - memtask_checkbox
+  - memtask
+  - add_env_checkbox
+  - additional_environment
+  - bc_email_on_started

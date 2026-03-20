@@ -51,6 +51,12 @@ fi
 
 # Run app and keep session alive only while app runs
 if [[ -n "$OOD_APP_LAUNCH" ]]; then
+  IGV_PREFS="${HOME}/.igv/prefs.properties"
+  if [[ -f "${IGV_PREFS}" ]]; then
+    # Remove stale genome file references (e.g., missing hg19 files on CVMFS) to avoid startup popups.
+    sed -i '/\.genome/d' "${IGV_PREFS}"
+  fi
+
   APP_CMD=$(echo "$OOD_APP_LAUNCH" | awk -F/ '{print $1}')
   if command -v igv.sh >/dev/null 2>&1; then
     APP_CMD="$(command -v igv.sh)"
