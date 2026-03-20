@@ -1,6 +1,13 @@
 # Two different "email" pieces:
-# - attributes.email: form field (hidden); value set in support_ticket_oidc_email.rb from ~/ondemand/oidc_email.txt
+# - attributes.email: hidden field; value filled via ERB from ~/ondemand/oidc_email.txt (same as batch connect).
 # - email: below = SMTP delivery (to, relay, etc.) — required; do not remove.
+#
+# ERB runs when this user's dashboard loads merged config (PUN runs as the Unix user, so ~ is correct).
+# If the file was missing on first load, restart the web server (Help → Restart Web Server) after login.
+<%-
+  emailaddr = File.read(File.expand_path('~/ondemand/oidc_email.txt')).strip rescue ''
+-%>
+
 support_ticket:
   description: |
     Submit a support request for Eureka Open OnDemand. Include steps to reproduce,
@@ -11,6 +18,8 @@ support_ticket:
       widget: hidden_field
       required: true
       skip_label: true
+      cacheable: false
+      value: <%= emailaddr.inspect %>
 
   attachments:
     max_items: 4

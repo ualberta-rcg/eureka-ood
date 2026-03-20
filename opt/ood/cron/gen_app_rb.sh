@@ -10,7 +10,14 @@ fi
 
 OUTDIR="/etc/ood/config/apps/dashboard/initializers"
 OUTFILE="${OUTDIR}/paice_app_versions.rb"
-MODULE_USER="clg_98da5933b7a1"
+# Local probe account used with CiLogon/OIDC (same idea as a real login user for MODULEPATH).
+# Override: export MODULE_USER=otheruser before running.
+MODULE_USER="${MODULE_USER:-cilogon}"
+
+if ! id -u "$MODULE_USER" &>/dev/null; then
+  echo "gen_app_rb.sh: user '$MODULE_USER' does not exist (NSS/SSSD may need a refresh: systemctl restart sssd)." >&2
+  exit 1
+fi
 
 mkdir -p "$OUTDIR"
 
