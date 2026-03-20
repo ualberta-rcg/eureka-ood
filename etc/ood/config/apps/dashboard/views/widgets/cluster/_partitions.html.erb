@@ -8,8 +8,9 @@
   jQuery(function (){
     $('#metrics-partition-status').DataTable({
       searching: false,
-      lengthChange: false,
-      pageLength: 5,
+      lengthChange: true,
+      pageLength: 15,
+      lengthMenu: [[10, 15, 25, 50, -1], [10, 15, 25, 50, "All"]],
       pagingType: "simple",
       language: {
         paginate: {
@@ -50,11 +51,11 @@
     }
 
     .partition-widget-component table {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .partition-widget-component table .small {
-        font-size: 0.73rem;
+        font-size: 0.85rem;
     }
 
     .partition-widget-component table td {
@@ -82,8 +83,8 @@
     }
 
     .partition-widget-component .card-body {
-        padding-top: 5px;
-        padding-bottom: 4px;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
     }
 
     .partition-widget-component div#metrics-partition-status_info {

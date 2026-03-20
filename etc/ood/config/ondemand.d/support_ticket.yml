@@ -1,17 +1,22 @@
-<%-
-  emailaddr = File.read(File.expand_path('~/ondemand/oidc_email.txt')).strip rescue ''
--%>
+# Two different "email" pieces:
+# - attributes.email: form field (hidden); value set in support_ticket_oidc_email.rb from ~/ondemand/oidc_email.txt
+# - email: below = SMTP delivery (to, relay, etc.) — required; do not remove.
 support_ticket:
   description: |
     Submit a support request for Eureka Open OnDemand. Include steps to reproduce,
     error text, and optionally screenshots/log snippets.
+
+  attributes:
+    email:
+      widget: hidden_field
+      required: true
+      skip_label: true
 
   attachments:
     max_items: 4
     max_size: 6291456
 
   email:
-    from: <%= emailaddr.inspect %>
     to: "rschsppt+eureka@ualberta.ca"
     delivery_method: "smtp"
     delivery_settings:

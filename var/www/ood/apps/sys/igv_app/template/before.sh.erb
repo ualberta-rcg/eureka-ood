@@ -36,21 +36,26 @@ echo "[before.sh.erb] XDG_RUNTIME_DIR set to $XDG_RUNTIME_DIR"
 # Unset bash-exported functions (KDE dislikes these)
 unset $(env | grep -o '^BASH_FUNC_.*%%' | cut -d= -f1)
 
-# GPU detection
+# GPU / VirtualGL: use libvglfaker-nodl only. libdlfaker intercepts dlopen() and
+# breaks on some driver/glibc stacks (Eureka); Vulcan tolerated the legacy pair.
 VGL_LIB_PATH="/usr/lib"
 GPU_PRESENT=$(nvidia-smi --query-gpu=name --format=csv,noheader,nounits 2>/dev/null | grep -v "^$" | head -n 1)
 
-if [[ -n "$GPU_PRESENT" && "$GPU_PRESENT" != "No devices were found" && -f "${VGL_LIB_PATH}/libdlfaker.so" && -f "${VGL_LIB_PATH}/libvglfaker.so" ]]; then
+LD_PRELOAD=$(echo "${LD_PRELOAD:-}" | tr ':' '\n' | grep -v 'libdlfaker\|libvglfaker' | tr '\n' ':' | sed 's/:$//')
+
+if [[ -n "$GPU_PRESENT" && "$GPU_PRESENT" != "No devices were found" && -f "${VGL_LIB_PATH}/libvglfaker-nodl.so" ]]; then
   export OOD_GPU_AVAILABLE=true
   export VGL_DISPLAY=egl
-  export LD_PRELOAD="${VGL_LIB_PATH}/libdlfaker.so:${VGL_LIB_PATH}/libvglfaker.so"
+  export LD_PRELOAD="${VGL_LIB_PATH}/libvglfaker-nodl.so${LD_PRELOAD:+:${LD_PRELOAD}}"
   echo "[before.sh.erb] GPU detected: $GPU_PRESENT"
-  echo "[before.sh.erb] VirtualGL enabled"
+  echo "[before.sh.erb] VirtualGL enabled (libvglfaker-nodl)"
 else
   export OOD_GPU_AVAILABLE=false
+  unset VGL_DISPLAY
   export LIBGL_ALWAYS_SOFTWARE=1
   export QT_QUICK_BACKEND=software
-  echo "[before.sh.erb] No GPU or VirtualGL missing — using software rendering"
+  export LD_PRELOAD
+  echo "[before.sh.erb] No GPU or libvglfaker-nodl — using software rendering"
 fi
 
 echo "[before.sh.erb] Setup complete."

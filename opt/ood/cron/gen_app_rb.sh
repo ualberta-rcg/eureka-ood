@@ -2,6 +2,12 @@
 #set -euo pipefail
 set -x
 
+# Requires root: writes under /etc/ood/... and runs "sudo -u MODULE_USER" for module spider.
+if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+  echo "gen_app_rb.sh: must run as root (e.g. sudo $0)" >&2
+  exit 1
+fi
+
 OUTDIR="/etc/ood/config/apps/dashboard/initializers"
 OUTFILE="${OUTDIR}/paice_app_versions.rb"
 MODULE_USER="clg_98da5933b7a1"

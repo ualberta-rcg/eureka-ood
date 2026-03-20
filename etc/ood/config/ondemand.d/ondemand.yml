@@ -117,7 +117,7 @@ custom_pages:
   partitions:
     rows:
       - columns:
-          - width: 4
+          - width: 12
             widgets:
               - "cluster/partitions"
 
