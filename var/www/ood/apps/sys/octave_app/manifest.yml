@@ -1,7 +1,7 @@
 ---
 name: Octave
 category: Interactive Apps
-subcategory: Scientific Tools
+subcategory: Mathematics
 role: batch_connect
 description: |
   Launch an [GNU Octave] session on the Eureka high-performance computing (HPC) cluster, operated by the [University of Alberta].

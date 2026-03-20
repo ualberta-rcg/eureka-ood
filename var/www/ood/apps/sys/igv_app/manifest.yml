@@ -1,7 +1,7 @@
 ---
 name: IGV
 category: Interactive Apps
-subcategory: Scientific Tools
+subcategory: Bioinformatics
 role: batch_connect
 description: |
   Launch [IGV (Integrative Genomics Viewer)] on the Eureka high-performance computing (HPC) cluster using the shared CVMFS software stack.

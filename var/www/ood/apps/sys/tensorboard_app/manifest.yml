@@ -1,7 +1,7 @@
 --- 
 name: TensorBoard
 category: Interactive Apps
-subcategory: Servers & IDEs
+subcategory: Development
 role: batch_connect
 description: |
   Launch [TensorBoard] on the Eureka high-performance computing (HPC) cluster, using the shared CVMFS software stack.

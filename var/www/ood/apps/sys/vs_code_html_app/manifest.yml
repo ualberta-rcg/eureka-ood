@@ -1,7 +1,7 @@
 ---
 name: VS Code Server
 category: Interactive Apps
-subcategory: Servers & IDEs
+subcategory: Development
 role: batch_connect
 description: |
   Launch a [Visual Studio Code] session in your browser, running on the Eureka HPC cluster, operated by the [University of Alberta].

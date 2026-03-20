@@ -1,7 +1,7 @@
 ---
 name: Blender
 category: Interactive Apps
-subcategory: Scientific Tools
+subcategory: Visualization
 role: batch_connect
 description: |
   Launch an [Blender] session on the Eureka high-performance computing (HPC) cluster, operated by the [University of Alberta].

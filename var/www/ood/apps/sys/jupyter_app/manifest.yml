@@ -1,7 +1,7 @@
 ---
 name: Jupyter Lab
 category: Interactive Apps
-subcategory: Servers & IDEs
+subcategory: Development
 role: batch_connect
 description: |
   Launch a [JupyterLab] server on the Eureka high-performance computing (HPC) cluster, powered by the [University of Alberta].

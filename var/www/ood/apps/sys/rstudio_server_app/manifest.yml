@@ -1,7 +1,7 @@
 ---
 name: RStudio Server
 category: Interactive Apps
-subcategory: Servers & IDEs
+subcategory: Development
 role: batch_connect
 description: |
   Launch [RStudio Server] on the Eureka high-performance computing (HPC) cluster, powered by the [University of Alberta].
