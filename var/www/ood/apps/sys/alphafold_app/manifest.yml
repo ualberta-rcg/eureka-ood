@@ -1,7 +1,7 @@
 ---
 name: AlphaFold
 category: Interactive Apps
-subcategory: Data Tools
+subcategory: Scientific Tools
 role: batch_connect
 description: |
   Launch [AlphaFold] protein structure predictions on the Eureka high-performance computing (HPC) cluster using the shared CVMFS software stack.

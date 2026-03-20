@@ -10,23 +10,21 @@ const gpuData = JSON.parse(gpuDataField.value);
 const memoryDataField = document.getElementById('batch_connect_session_context_memorydata');
 const cpuDataField = document.getElementById('batch_connect_session_context_cpunum');
 
-const maxMemoryGB = parseInt(memoryDataField.value) || 64;
-const maxCpus = parseInt(cpuDataField.value) || 32;
+const maxMemoryGB = parseInt(memoryDataField.value, 10) || 64;
+const maxCpus = parseInt(cpuDataField.value, 10) || 32;
 
 const minCpuField = document.getElementById('batch_connect_session_context_mincpu');
 const minRamField = document.getElementById('batch_connect_session_context_minram');
 
-const minCpus = parseInt(minCpuField?.value || "1", 10);
-const minRam = parseInt(minRamField?.value || "1", 10);
-// Never hide 1 GB in memory dropdown; ignore stale server minram > 1
-const effectiveMinRam = Math.min(minRam, 1);
+const minCpus = parseInt(minCpuField?.value || '2', 10);
+const minRam = parseInt(minRamField?.value || '4', 10);
 
 // -- GPU Type Dropdown Handling --------------------------------------------------------------
 function updateGpuTypeDropdown() {
   const gpuSelect = $('#batch_connect_session_context_gpu_type');
   const gpuCheckbox = $('#batch_connect_session_context_gpu_checkbox');
 
-  gpuSelect.empty();  // Always clear it first
+  gpuSelect.empty();
 
   if (gpuCheckbox.is(':checked')) {
     Object.keys(gpuData.gpu_name_mappings).forEach(gpuId => {
@@ -48,7 +46,7 @@ function updateGpuCountMax() {
     gpuCountField.attr('max', 1);
   }
 
-  if (selectedGpu === "none") {
+  if (selectedGpu === 'none') {
     gpuCountField.parent().hide();
   } else {
     gpuCountField.parent().show();
@@ -65,7 +63,7 @@ function toggleGpuFields() {
   let showGpu;
 
   if (isHidden) {
-    showGpu = gpuCheckbox.val() === "1";
+    showGpu = gpuCheckbox.val() === '1';
   } else {
     showGpu = gpuCheckbox.is(':checked');
   }
@@ -104,7 +102,7 @@ function toggleMemtask() {
   let checked;
 
   if (isHidden) {
-    checked = memtaskCheckbox.val() === "1";
+    checked = memtaskCheckbox.val() === '1';
   } else {
     checked = memtaskCheckbox.is(':checked');
   }
@@ -114,22 +112,21 @@ function toggleMemtask() {
     memtaskField.parent().show();
 
     memtaskField.find('option').each(function () {
-      const memVal = parseInt($(this).val());
-      if (memVal > maxMemoryGB || memVal < effectiveMinRam) {
+      const memVal = parseInt($(this).val(), 10);
+      if (memVal > maxMemoryGB || memVal < minRam) {
         $(this).hide();
       } else {
         $(this).show();
       }
     });
 
-    const currentVal = parseInt(memtaskField.val());
-    if (currentVal < effectiveMinRam) {
-      memtaskField.val(String(effectiveMinRam));
+    const currentVal = parseInt(memtaskField.val(), 10);
+    if (currentVal < minRam) {
+      memtaskField.val(String(minRam));
     }
-
   } else {
     memtaskCheckbox.val('0');
-    memtaskField.val('1');
+    memtaskField.val(String(minRam));
     memtaskField.parent().hide();
   }
 }
@@ -144,20 +141,19 @@ $(document).ready(function () {
   $('#batch_connect_session_context_gpu_type').change(updateGpuCountMax);
   $('#batch_connect_session_context_add_env_checkbox').change(toggleAdditionalEnv);
   $('#batch_connect_session_context_memtask_checkbox').change(toggleMemtask);
-  $('#batch_connect_session_context_num_cores').attr('max', maxCpus);
-  $('#batch_connect_session_context_num_cores').attr('min', minCpus);
 
   const numCoresField = $('#batch_connect_session_context_num_cores');
+  numCoresField.attr('max', maxCpus);
+  numCoresField.attr('min', minCpus);
+
   const currentCores = parseInt(numCoresField.val(), 10);
   if (currentCores < minCpus) {
     numCoresField.val(minCpus);
-  } else {
-    numCoresField.val(1);
   }
+
   const memtaskField = $('#batch_connect_session_context_memtask');
   if (memtaskField.parent().is(':visible')) {
-    memtaskField.val('1');
+    const mv = parseInt(memtaskField.val(), 10);
+    memtaskField.val(String(mv < minRam ? minRam : mv));
   }
 });
-
-

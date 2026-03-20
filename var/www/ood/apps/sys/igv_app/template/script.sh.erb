@@ -1,81 +1,35 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-echo "[script.sh.erb] Starting IGV session for user: $USER"
-
-# Unset broken proxy (squid hostname doesn't resolve on compute nodes)
-unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
-
+echo "[script.sh.erb] Starting desktop environment setup for user: $USER"
+echo "[script.sh.erb] Working directory: $HOME"
 cd "${HOME}" || {
   echo "[script.sh.erb] ERROR: Failed to change to home directory: $HOME"
   exit 1
 }
-echo "[script.sh.erb] Changed working directory to ${HOME}"
 
-# Run any user-specified "Additional environment setup" commands first.
-<% if context.respond_to?(:additional_environment) && context.additional_environment.present? %>
-echo "[script.sh.erb] Applying additional environment setup..."
-JOB_DIR="${JOB_DIR:-$(pwd)}"
-cat > "${JOB_DIR}/additional_env.sh" << 'EOF'
-<%= context.additional_environment %>
-EOF
-source "${JOB_DIR}/additional_env.sh"
-<% end %>
+# Set the login shell
+export SHELL="$(getent passwd "$USER" | cut -d: -f7)"
+echo "[script.sh.erb] SHELL set to: $SHELL"
 
-echo "[script.sh.erb] Loading IGV modules..."
-module purge
+# Add xhost so that Firefox works
+xhost +SI:localuser:$USER
 
-<% if defined?(gpu_checkbox) && gpu_checkbox == "1" && defined?(gpu_type) && gpu_type && gpu_type != "none" %>
-echo "[script.sh.erb] GPU selected in form (type=<%= gpu_type %>); loading CUDA toolkit module cuda/12.9."
-module load cuda/12.9
-<% end %>
+# Websockify port information
+echo "[script.sh.erb] websockify is listening on port: ${WEBSOCKIFY_PORT}"
 
-TARGET_ENV_MODULE="StdEnv/2020"
-TARGET_IGV_MODULE="${IGV_MODULE:-igv/2.9.2}"
+# Display the desktop environment being launched
+echo "[script.sh.erb] Launching desktop session: '<%= context.desktop %>'..."
 
-# Same pattern as RStudio Server: try load, then resolve prerequisites via module spider
-if module load "${TARGET_ENV_MODULE}" "${TARGET_IGV_MODULE}"; then
-  echo "[script.sh.erb] Successfully loaded ${TARGET_ENV_MODULE} ${TARGET_IGV_MODULE}"
+# Construct path to desktop launcher script
+DESKTOP_SCRIPT="<%= session.staged_root.join("desktops", "#{context.desktop}.sh") %>"
+
+# Confirm script exists before sourcing
+if [[ -x "$DESKTOP_SCRIPT" ]]; then
+  echo "[script.sh.erb] Executing desktop startup script: $DESKTOP_SCRIPT"
+  source "$DESKTOP_SCRIPT"
+  echo "[script.sh.erb] Desktop session '<%= context.desktop %>' exited with status $?"
 else
-  echo "[script.sh.erb] Initial load failed, checking prerequisites for ${TARGET_IGV_MODULE}..."
-  ALL_MODULES=$(module spider "${TARGET_IGV_MODULE}" 2>&1 | \
-                awk '/You will need to load all module\(s\)/, /This module provides/' | \
-                grep -Eo '[A-Za-z0-9_/-]+/[0-9.]+' | sort -u)
-  PREREQS=""
-  for mod in $ALL_MODULES; do
-    if [[ "$mod" != "${TARGET_IGV_MODULE}" ]]; then
-      PREREQS="$PREREQS $mod"
-    fi
-  done
-  if [[ -n "$PREREQS" ]]; then
-    echo "[script.sh.erb] Detected prerequisites: $PREREQS"
-    module load $PREREQS
-    echo "[script.sh.erb] Retrying load of ${TARGET_ENV_MODULE} ${TARGET_IGV_MODULE}..."
-    if module load "${TARGET_ENV_MODULE}" "${TARGET_IGV_MODULE}"; then
-      echo "[script.sh.erb] Successfully loaded after prerequisites."
-    else
-      echo "[script.sh.erb] ERROR: Failed to load IGV stack even after prerequisites."
-      echo "[script.sh.erb] Hint: set IGV_MODULE in Additional environment setup if your module name differs."
-      exit 1
-    fi
-  else
-    echo "[script.sh.erb] ERROR: No prerequisites found from module spider. Try: module spider ${TARGET_IGV_MODULE}"
-    exit 1
-  fi
-fi
-
-IGV_BIN=""
-if command -v igv.sh >/dev/null 2>&1; then
-  IGV_BIN="$(command -v igv.sh)"
-elif command -v igv >/dev/null 2>&1; then
-  IGV_BIN="$(command -v igv)"
-fi
-
-if [[ -z "${IGV_BIN}" ]]; then
-  echo "[script.sh.erb] ERROR: Neither 'igv.sh' nor 'igv' was found in PATH after module load."
+  echo "[script.sh.erb] ERROR: Desktop script not found or not executable: $DESKTOP_SCRIPT"
   exit 1
 fi
 
-echo "[script.sh.erb] Using IGV launcher: ${IGV_BIN}"
-echo "[script.sh.erb] Launching IGV..."
-
-exec "${IGV_BIN}"

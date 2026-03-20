@@ -29,6 +29,7 @@ apps=(
   visit
   matlab
   vmd
+  igv
 )
 
 # Helper to title the app
@@ -40,6 +41,7 @@ get_title() {
     code-server) echo "VS Code Server" ;;
     paraview) echo "ParaView" ;;
     vmd) echo "VMD" ;;
+    igv) echo "IGV" ;;
     qgis) echo "QGIS" ;;
     blender) echo "Blender" ;;
     octave) echo "Octave" ;;

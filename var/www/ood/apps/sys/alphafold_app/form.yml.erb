@@ -90,6 +90,32 @@ attributes:
 # Import common job parameters from template (cores, hours, email, VNC resolution, etc.)
 <% IO.foreach(template_root+"job_params") do |line| %><%= line %><% end %>
 
+  # Override job_params so CPU/memory defaults match AlphaFold minima (JS also enforces)
+  num_cores:
+    widget: "number_field"
+    label: "Number of CPU cores"
+    value: <%= min_cores %>
+    min: <%= min_cores %>
+    max: <%= CustomClusterInfo.max_cpus_per_node %>
+    step: 1
+    help: "Maximum number of CPU cores is limited by the maximun CPU cores on a node. See [Alliance Cluster Documentation](https://docs.alliancecan.ca/wiki/Technical_support) for host specifications."
+
+  memtask:
+    widget: select
+    label: "Select Memory (GB)"
+    value: "<%= min_mem_gb %>"
+    options:
+      - [ "2 GB", "2" ]
+      - [ "4 GB", "4" ]
+      - [ "8 GB", "8" ]
+      - [ "16 GB", "16" ]
+      - [ "32 GB", "32" ]
+      - [ "64 GB", "64" ]
+      - [ "128 GB", "128" ]
+      - [ "256 GB", "256" ]
+      - [ "512 GB", "512" ]
+      - [ "1024 GB", "1024" ]
+
   # Force memory customization to be enabled for this application
   memtask_checkbox:
     value: "1"

@@ -1,4 +1,6 @@
-# SMTP: smtp.ualberta.ca:25, STARTTLS, no auth (same pattern as campus relay / sarek reports).
+<%-
+  emailaddr = File.read(File.expand_path('~/ondemand/oidc_email.txt')).strip rescue ''
+-%>
 support_ticket:
   description: |
     Submit a support request for Eureka Open OnDemand. Include steps to reproduce,
@@ -9,7 +11,7 @@ support_ticket:
     max_size: 6291456
 
   email:
-    from: "ood@eureka.ualberta.ca"
+    from: <%= emailaddr.inspect %>
     to: "rschsppt+eureka@ualberta.ca"
     delivery_method: "smtp"
     delivery_settings:

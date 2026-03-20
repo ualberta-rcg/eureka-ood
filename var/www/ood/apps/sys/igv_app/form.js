@@ -16,10 +16,8 @@ const maxCpus = parseInt(cpuDataField.value) || 32;
 const minCpuField = document.getElementById('batch_connect_session_context_mincpu');
 const minRamField = document.getElementById('batch_connect_session_context_minram');
 
-const minCpus = parseInt(minCpuField?.value || "1", 10);
-const minRam = parseInt(minRamField?.value || "1", 10);
-// Never hide 1 GB in memory dropdown (match Desktop/Jupyter); ignore stale server minram > 1
-const effectiveMinRam = Math.min(minRam, 1);
+const minCpus = parseInt(minCpuField?.value || "2", 10);
+const minRam = parseInt(minRamField?.value || "4", 10);
 
 // -- GPU Type Dropdown Handling --------------------------------------------------------------
 function updateGpuTypeDropdown() {
@@ -33,7 +31,6 @@ function updateGpuTypeDropdown() {
       gpuSelect.append(new Option(gpuData.gpu_name_mappings[gpuId], gpuId));
     });
   } else {
-    // When not checked, dropdown stays empty
     gpuSelect.append(new Option('none', 'none'));
   }
 }
@@ -62,7 +59,6 @@ function toggleGpuFields() {
   const gpuType = $('#batch_connect_session_context_gpu_type');
   const gpuCount = $('#batch_connect_session_context_gpu_count');
 
-  // Detect if the field is a visible checkbox or a hidden input
   const isHidden = gpuCheckbox.attr('type') === 'hidden';
   let showGpu;
 
@@ -102,7 +98,6 @@ function toggleMemtask() {
   const memtaskCheckbox = $('#batch_connect_session_context_memtask_checkbox');
   const memtaskField = $('#batch_connect_session_context_memtask');
 
-  // Check if the field is hidden or a checkbox
   const isHidden = memtaskCheckbox.attr('type') === 'hidden';
   let checked;
 
@@ -116,25 +111,23 @@ function toggleMemtask() {
     memtaskCheckbox.val('1');
     memtaskField.parent().show();
 
-    // Dynamically filter memory options based on min/max (effectiveMinRam so 1 GB always shown)
     memtaskField.find('option').each(function () {
       const memVal = parseInt($(this).val());
-      if (memVal > maxMemoryGB || memVal < effectiveMinRam) {
+      if (memVal > maxMemoryGB || memVal < minRam) {
         $(this).hide();
       } else {
         $(this).show();
       }
     });
 
-    // If current selection is below min, set it
     const currentVal = parseInt(memtaskField.val());
-    if (currentVal < effectiveMinRam) {
-      memtaskField.val(String(effectiveMinRam));
+    if (currentVal < minRam) {
+      memtaskField.val(String(minRam));
     }
 
   } else {
     memtaskCheckbox.val('0');
-    memtaskField.val('1'); // Reset to default
+    memtaskField.val(String(minRam));
     memtaskField.parent().hide();
   }
 }
@@ -145,7 +138,6 @@ $(document).ready(function () {
   toggleAdditionalEnv();
   toggleMemtask();
 
-  // Checkbox handlers
   $('#batch_connect_session_context_gpu_checkbox').change(toggleGpuFields);
   $('#batch_connect_session_context_gpu_type').change(updateGpuCountMax);
   $('#batch_connect_session_context_add_env_checkbox').change(toggleAdditionalEnv);
@@ -153,18 +145,8 @@ $(document).ready(function () {
   $('#batch_connect_session_context_num_cores').attr('max', maxCpus);
   $('#batch_connect_session_context_num_cores').attr('min', minCpus);
 
-  // Set default 1 core, 1 GB if allowed
-  const numCoresField = $('#batch_connect_session_context_num_cores');
-  const currentCores = parseInt(numCoresField.val(), 10);
+  const currentCores = parseInt($('#batch_connect_session_context_num_cores').val(), 10);
   if (currentCores < minCpus) {
-    numCoresField.val(minCpus);
-  } else {
-    numCoresField.val(1);
-  }
-  const memtaskField = $('#batch_connect_session_context_memtask');
-  if (memtaskField.parent().is(':visible')) {
-    memtaskField.val('1');
+    $('#batch_connect_session_context_num_cores').val(minCpus);
   }
 });
-
-

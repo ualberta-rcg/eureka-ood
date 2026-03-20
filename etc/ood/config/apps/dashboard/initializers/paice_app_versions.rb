@@ -89,4 +89,10 @@ module CustomAppVersions
       ["VMD 1.9.4a57", "vmd/1.9.4a57"],
     ].reverse
   end
+
+  def self.igv_module_list
+    [
+      ["IGV 2.9.2", "igv/2.9.2"],
+    ].reverse
+  end
 end
