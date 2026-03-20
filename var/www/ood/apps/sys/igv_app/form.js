@@ -7,50 +7,116 @@
 const gpuDataField = document.getElementById('batch_connect_session_context_gpudata');
 const gpuData = JSON.parse(gpuDataField.value);
 
+const gpuMappings = gpuData.gpu_name_mappings || {};
+const gpuMaxCounts = gpuData.gpu_max_counts || {};
+
 const memoryDataField = document.getElementById('batch_connect_session_context_memorydata');
 const cpuDataField = document.getElementById('batch_connect_session_context_cpunum');
 
-const maxMemoryGB = parseInt(memoryDataField.value) || 64;
-const maxCpus = parseInt(cpuDataField.value) || 32;
+const maxMemoryGB = parseInt(memoryDataField.value, 10) || 64;
+const maxCpus = parseInt(cpuDataField.value, 10) || 32;
 
 const minCpuField = document.getElementById('batch_connect_session_context_mincpu');
 const minRamField = document.getElementById('batch_connect_session_context_minram');
 
-const minCpus = parseInt(minCpuField?.value || "2", 10);
-const minRam = parseInt(minRamField?.value || "4", 10);
+const minCpus = parseInt(minCpuField?.value || '2', 10);
+const minRam = parseInt(minRamField?.value || '4', 10);
 
-// -- GPU Type Dropdown Handling --------------------------------------------------------------
+function isFractionalGpuId(id) {
+  return typeof id === 'string' && /\.[0-9]+$/.test(id);
+}
+
+function baseGpuTypeFromId(id) {
+  if (typeof id !== 'string') return id;
+  return id.replace(/\.[0-9]+$/, '');
+}
+
+function currentGpuCount() {
+  const v = parseInt($('#batch_connect_session_context_gpu_count').val(), 10);
+  return Number.isFinite(v) && v > 0 ? v : 1;
+}
+
+// -- GPU Type Dropdown: hide fractional options when requesting multiple full GPUs (count > 1) -------------------------
 function updateGpuTypeDropdown() {
   const gpuSelect = $('#batch_connect_session_context_gpu_type');
   const gpuCheckbox = $('#batch_connect_session_context_gpu_checkbox');
 
-  gpuSelect.empty();  // Always clear it first
+  gpuSelect.empty();
 
-  if (gpuCheckbox.is(':checked')) {
-    Object.keys(gpuData.gpu_name_mappings).forEach(gpuId => {
-      gpuSelect.append(new Option(gpuData.gpu_name_mappings[gpuId], gpuId));
-    });
-  } else {
+  if (!gpuCheckbox.is(':checked')) {
+    gpuSelect.append(new Option('none', 'none'));
+    return;
+  }
+
+  const cnt = currentGpuCount();
+  const keys = Object.keys(gpuMappings);
+  if (keys.length === 0) {
+    gpuSelect.append(new Option('(no GPUs configured)', 'none'));
+    return;
+  }
+
+  keys.forEach((gpuId) => {
+    if (cnt > 1 && isFractionalGpuId(gpuId)) return;
+    gpuSelect.append(new Option(gpuMappings[gpuId], gpuId));
+  });
+
+  if (gpuSelect.find('option').length === 0) {
     gpuSelect.append(new Option('none', 'none'));
   }
 }
 
-// -- GPU Count Max Handling --------------------------------------------------------------------
+// -- GPU count min/max; fractional types allow count up to gpu_max_counts (often > 1) -----------------------------------
 function updateGpuCountMax() {
   const selectedGpu = $('#batch_connect_session_context_gpu_type').val();
   const gpuCountField = $('#batch_connect_session_context_gpu_count');
 
-  if (selectedGpu && gpuData.gpu_max_counts[selectedGpu]) {
-    gpuCountField.attr('max', gpuData.gpu_max_counts[selectedGpu]);
-  } else {
+  if (!selectedGpu || selectedGpu === 'none') {
     gpuCountField.attr('max', 1);
+    gpuCountField.attr('min', 1);
+    gpuCountField.parent().hide();
+    return;
   }
 
-  if (selectedGpu === "none") {
-    gpuCountField.parent().hide();
-  } else {
-    gpuCountField.parent().show();
+  gpuCountField.parent().show();
+  const maxC = gpuMaxCounts[selectedGpu];
+  const maxVal = maxC !== undefined && maxC !== null ? parseInt(maxC, 10) : 1;
+  const safeMax = Number.isFinite(maxVal) && maxVal > 0 ? maxVal : 1;
+  gpuCountField.attr('max', safeMax);
+  gpuCountField.attr('min', 1);
+
+  let cur = parseInt(gpuCountField.val(), 10);
+  if (!Number.isFinite(cur) || cur < 1) cur = 1;
+  if (cur > safeMax) gpuCountField.val(String(safeMax));
+}
+
+function onGpuTypeChanged() {
+  const sel = $('#batch_connect_session_context_gpu_type').val();
+  const gpuCountField = $('#batch_connect_session_context_gpu_count');
+  if (isFractionalGpuId(sel)) {
+    const c = currentGpuCount();
+    if (c > 1) gpuCountField.val('1');
   }
+  updateGpuCountMax();
+}
+
+function onGpuCountChanged() {
+  const sel = $('#batch_connect_session_context_gpu_type').val();
+  const cnt = currentGpuCount();
+  if (cnt > 1 && isFractionalGpuId(sel)) {
+    const base = baseGpuTypeFromId(sel);
+    if (base && gpuMappings[base] !== undefined) {
+      $('#batch_connect_session_context_gpu_type').val(base);
+    }
+  }
+  updateGpuTypeDropdown();
+  const selAfter = $('#batch_connect_session_context_gpu_type').val();
+  if (selAfter === 'none' || !selAfter) {
+    const first = $('#batch_connect_session_context_gpu_type option').filter(function () {
+      return $(this).val() && $(this).val() !== 'none';
+    }).first();
+    if (first.length) $('#batch_connect_session_context_gpu_type').val(first.val());
+  }
+  updateGpuCountMax();
 }
 
 // -- GPU Fields Toggle (checkbox) -------------------------------------------------------------
@@ -63,7 +129,7 @@ function toggleGpuFields() {
   let showGpu;
 
   if (isHidden) {
-    showGpu = gpuCheckbox.val() === "1";
+    showGpu = gpuCheckbox.val() === '1';
   } else {
     showGpu = gpuCheckbox.is(':checked');
   }
@@ -102,7 +168,7 @@ function toggleMemtask() {
   let checked;
 
   if (isHidden) {
-    checked = memtaskCheckbox.val() === "1";
+    checked = memtaskCheckbox.val() === '1';
   } else {
     checked = memtaskCheckbox.is(':checked');
   }
@@ -112,7 +178,7 @@ function toggleMemtask() {
     memtaskField.parent().show();
 
     memtaskField.find('option').each(function () {
-      const memVal = parseInt($(this).val());
+      const memVal = parseInt($(this).val(), 10);
       if (memVal > maxMemoryGB || memVal < minRam) {
         $(this).hide();
       } else {
@@ -120,14 +186,13 @@ function toggleMemtask() {
       }
     });
 
-    const currentVal = parseInt(memtaskField.val());
+    const currentVal = parseInt(memtaskField.val(), 10);
     if (currentVal < minRam) {
       memtaskField.val(String(minRam));
     }
-
   } else {
     memtaskCheckbox.val('0');
-    memtaskField.val(String(minRam));
+    memtaskField.val('2');
     memtaskField.parent().hide();
   }
 }
@@ -137,9 +202,11 @@ $(document).ready(function () {
   toggleGpuFields();
   toggleAdditionalEnv();
   toggleMemtask();
+  onGpuCountChanged();
 
   $('#batch_connect_session_context_gpu_checkbox').change(toggleGpuFields);
-  $('#batch_connect_session_context_gpu_type').change(updateGpuCountMax);
+  $('#batch_connect_session_context_gpu_type').change(onGpuTypeChanged);
+  $('#batch_connect_session_context_gpu_count').on('change input', onGpuCountChanged);
   $('#batch_connect_session_context_add_env_checkbox').change(toggleAdditionalEnv);
   $('#batch_connect_session_context_memtask_checkbox').change(toggleMemtask);
   $('#batch_connect_session_context_num_cores').attr('max', maxCpus);
