@@ -4,7 +4,8 @@ app_name = "VS Code Server"
 template_root = "/var/www/ood/apps/templates/"
 
 # Get the first available VS Code version to use as default
-first_label, first_value = CustomAppVersions.code_server_module_list.first
+first_pair = CustomAppVersions.code_server_module_list.first
+first_label, first_value = first_pair || [nil, nil]
 
 # GPU configuration data passed to JavaScript for dynamic form behavior
 gpu_data = {
@@ -69,7 +70,7 @@ attributes:
   # Hidden field with automatically selected VS Code version (uses first available)
   code_server_version:
     widget: hidden_field
-    value: "<%= first_value %>"
+    value: "<%= first_value.to_s %>"
 
 # Import common job parameters from template (cores, hours, email, VNC resolution, etc.)
 <% IO.foreach(template_root+"job_params") do |line| %><%= line %><% end %>
