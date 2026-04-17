@@ -70,6 +70,7 @@ attributes:
   # Hidden field with automatically selected VS Code version (uses first available)
   code_server_version:
     widget: hidden_field
+    cacheable: false
     value: "<%= first_value.to_s %>"
 
 # Import common job parameters from template (cores, hours, email, VNC resolution, etc.)
