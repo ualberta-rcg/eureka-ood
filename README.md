@@ -2,14 +2,16 @@
 
 # Eureka Open OnDemand Deployment  
 
-![Ubuntu Version](https://img.shields.io/badge/Ubuntu-24.04+-green?style=flat-square)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04+-E95420.svg)](https://ubuntu.com/)
+[![Open OnDemand](https://img.shields.io/badge/Open%20OnDemand-4.0+-blue.svg)](https://openondemand.org/)
+[![Apache](https://img.shields.io/badge/Apache-2.4+-red.svg)](https://httpd.apache.org/)
 
-**Maintained by:** Rahim Khoja ([khoja1@ualberta.ca](mailto:khoja1@ualberta.ca))
+**Maintained by:** Rahim Khoja ([khoja1@ualberta.ca](mailto:khoja1@ualberta.ca)) and Karim Ali ([kali2@ualberta.ca](mailto:kali2@ualberta.ca))
 
 ---
 
-## Description
+## 📖 Description
 
 This repository contains the complete configuration files, scripts, and application definitions for deploying **Open OnDemand (OOD) on the Eureka HPC cluster** - a Digital Research Alliance of Canada compute resource operated by **[AMII (Alberta Machine Intelligence Institute)](https://www.amii.ca/)** and the **University of Alberta** as part of the PAICE (Platform for Advanced Infrastructure and Computing Excellence) initiative.
 
@@ -17,15 +19,18 @@ The project provides a production-ready, reproducible setup for OOD using Apache
 
 **Live OOD URL:** [https://eureka.paice-ua.com/](https://eureka.paice-ua.com/) (PAICE domain; not `*.alliancecan.ca`).
 
-**Key Features:**
-- **Production-ready OOD deployment** with OIDC authentication
-- **Pre-configured applications** (Jupyter, RStudio, VS Code, MATLAB, ParaView, etc.)
-- **Automated configuration** via cron scripts for cluster discovery
-- **Multi-language support** (English-Canadian and French-Canadian)
-- **University of Alberta branding** with **[AMII partnership](https://www.amii.ca/)** integration
-- **Globus file transfer** integration for high-speed data movement
+## ✨ Features
 
-## Dashboard Screenshot
+- **Production-Ready OOD Deployment** — Apache, OIDC authentication, and Let's Encrypt SSL configured out of the box
+- **Pre-Configured Applications** — Jupyter, RStudio, VS Code, MATLAB, ParaView, and more, ready to run
+- **Automated Cluster Discovery** — cron scripts generate partition, GPU, and module info; no hand-editing required
+- **Multi-Language Support** — English-Canadian and French-Canadian localization built in
+- **University of Alberta Branding** — institutional theming with [AMII](https://www.amii.ca/) partnership integration
+- **Globus File Transfer** — high-speed data movement integrated into the dashboard
+- **SLURM-Native Integration** — job templates and resource limits aligned with cluster policy
+
+
+## 🖼️ Dashboard Screenshot
 
 <div align="center">
 
@@ -37,7 +42,7 @@ The project provides a production-ready, reproducible setup for OOD using Apache
 
 ---
 
-## Documentation
+## 📚 Documentation
 
 - **[INSTALLATION.md](./INSTALLATION.md)** - Step-by-step installation guide for Ubuntu 24.04
 - **[REQUIREMENTS.md](./REQUIREMENTS.md)** - System requirements and prerequisites
@@ -46,7 +51,7 @@ The project provides a production-ready, reproducible setup for OOD using Apache
 
 ---
 
-## Quick Start
+## 🚀 Quickstart
 
 To deploy this OOD configuration on your cluster:
 
@@ -65,7 +70,7 @@ To deploy this OOD configuration on your cluster:
 
 ---
 
-## References
+## 🔗 References
 
 * [Open OnDemand Documentation](https://osc.github.io/ood-documentation/latest/)
 * [Digital Research Alliance of Canada](https://alliancecanada.ca/en)
@@ -116,8 +121,6 @@ The following individuals have provided technical support and feedback to this p
 Many Bothans died to bring us this information. This project is provided as-is, but reasonable questions may be answered based on my coffee intake or mood. ;)
 
 Feel free to open an issue or email **[khoja1@ualberta.ca](mailto:khoja1@ualberta.ca)** or **[kali2@ualberta.ca](mailto:kali2@ualberta.ca)** for U of A related deployments.
-
----
 
 ## 📜 License
 
