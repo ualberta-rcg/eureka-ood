@@ -107,12 +107,12 @@ FLOWS_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/chainforge"
 mkdir -p "${FLOWS_DIR}/provider_scripts"
 # The Vulcan inference API is behind a Tyk gateway and REQUIRES an Authorization token.
 # Precedence: a per-user ~/.env_tyk OVERRIDES the site-wide shared key. The shared key is
-# injected by submit.yml.erb as CF_VULCAN_API_KEY from /opt/ood/vulcan_tyk.key, so all users
+# injected by submit.yml.erb as CF_EUREKA_API_KEY from /opt/ood/eureka_tyk.key, so all users
 # share one key until per-user keys are rolled out. We read the file directly (NOT ~/.bashrc).
 if [ -f "${HOME}/.env_tyk" ]; then
-  export CF_VULCAN_API_KEY="$(tr -d '[:space:]' < "${HOME}/.env_tyk")"
+  export CF_EUREKA_API_KEY="$(tr -d '[:space:]' < "${HOME}/.env_tyk")"
 fi
-if [ -z "${CF_VULCAN_API_KEY:-}" ]; then
+if [ -z "${CF_EUREKA_API_KEY:-}" ]; then
   echo "[script.sh.erb] WARNING: no Vulcan API token (no ~/.env_tyk and job_environment didn't provide the shared key); Vulcan prompts will get 401." >&2
 fi
 
@@ -121,7 +121,7 @@ cat > "${FLOWS_DIR}/provider_scripts/vulcan_provider.py" <<'PYEOF'
 
 Calls the Vulcan inference chat/completions endpoint (OpenAI-compatible) behind the
 Alliance Tyk gateway. The gateway REQUIRES an Authorization token; we read it from
-$CF_VULCAN_API_KEY (set by the OOD launch script from ~/.env_tyk) or ~/.env_tyk directly.
+$CF_EUREKA_API_KEY (set by the OOD launch script from ~/.env_tyk) or ~/.env_tyk directly.
 
 We expose a SMALL curated set of chat models that are kept scaled-up on Vulcan, so
 prompts don't block on a multi-minute cold start. All activity is logged to stdout
@@ -138,8 +138,8 @@ BASE = os.environ.get(
 
 
 def _load_token():
-    """Tyk gateway key: prefer $CF_VULCAN_API_KEY, else read ~/.env_tyk."""
-    k = os.environ.get("CF_VULCAN_API_KEY", "").strip()
+    """Tyk gateway key: prefer $CF_EUREKA_API_KEY, else read ~/.env_tyk."""
+    k = os.environ.get("CF_EUREKA_API_KEY", "").strip()
     if k:
         return k
     try:
@@ -186,7 +186,7 @@ def _call_vulcan(prompt, model, chat_history, temperature, max_tokens):
     if not API_KEY:
         raise Exception(
             "Vulcan API token not found. Put your Tyk gateway key in ~/.env_tyk "
-            "(or export CF_VULCAN_API_KEY) -- the Vulcan endpoint requires authorization."
+            "(or export CF_EUREKA_API_KEY) -- the Vulcan endpoint requires authorization."
         )
     messages = list(chat_history) if chat_history else []
     messages.append({"role": "user", "content": prompt})
@@ -202,7 +202,7 @@ def _call_vulcan(prompt, model, chat_history, temperature, max_tokens):
         )
         # Friendly handling of the common gateway failures (don't make users decode HTTP errors):
         if resp.status_code == 401:
-            raise Exception("Vulcan API rejected the token (401). Check ~/.env_tyk / CF_VULCAN_API_KEY.")
+            raise Exception("Vulcan API rejected the token (401). Check ~/.env_tyk / CF_EUREKA_API_KEY.")
         if resp.status_code == 503:
             try:
                 msg = resp.json().get("error", {}).get("message", resp.text[:200])
