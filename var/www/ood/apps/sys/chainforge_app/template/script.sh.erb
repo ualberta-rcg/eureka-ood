@@ -223,13 +223,13 @@ def _call_vulcan(prompt, model, chat_history, temperature, max_tokens):
 
 # Reasoning models (gpt-oss) emit thinking tokens counted against max_tokens, so they get the
 # high end of the budget; other models are concise. (Per-model floor applied below.)
-_REASONING_FLOOR = {"gpt-oss-120b": 2048, "gpt-oss-20b": 2048}
+_REASONING_FLOOR = {"gpt-oss-120b": 4096, "gpt-oss-20b": 4096}
 
 
 @provider(name="Vulcan", emoji="\U0001F30B", models=_MODELS,
           rate_limit=5, settings_schema=_SETTINGS)
 def VulcanCompletion(prompt, model, chat_history=None, temperature=0.7,
-                     max_tokens=1024, **kwargs):
+                     max_tokens=2048, **kwargs):
     """Call the Vulcan inference chat/completions endpoint (OpenAI format)."""
     floor = _REASONING_FLOOR.get(model)
     if floor and max_tokens < floor:
