@@ -6,7 +6,7 @@
   # Site-wide shared Vulcan Tyk key (all users, until per-user keys roll out). Root-owned
   # at /opt/ood/vulcan_tyk.key; injected into the job env here (rendered on the web node) so
   # it reaches the compute node. A per-user ~/.env_tyk overrides it (see script.sh.erb).
-  vulcan_tyk = File.read('/opt/ood/vulcan_tyk.key').strip rescue ''
+  eureka_tyk = File.read('/opt/ood/eureka_tyk.key').strip rescue ''
 -%>
 
 batch_connect:
@@ -17,7 +17,7 @@ script:
   job_environment:
     # Shared Vulcan Tyk gateway key (all users). Overridden by a per-user ~/.env_tyk
     # in script.sh.erb once per-user keys are rolled out.
-    CF_VULCAN_API_KEY: "<%= vulcan_tyk %>"
+    CF_EUREKA_API_KEY: "<%= eureka_tyk %>"
   <% if defined?(bc_email_on_started) && bc_email_on_started == "1" && emailaddr != "" %>
   email: <%= emailaddr.inspect %>
   <% end %>
