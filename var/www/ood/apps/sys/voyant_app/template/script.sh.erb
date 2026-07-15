@@ -6,6 +6,8 @@ echo "[script.sh.erb] Starting Voyant Server"
 module --force purge
 module load StdEnv/2023 java/11.0.22
 
+export SCRATCH="/home/${USER}/venv"
+
 VOYANT_VERSION="2.6.21"
 VOYANT_ZIP_URL="https://github.com/voyanttools/VoyantServer/releases/download/${VOYANT_VERSION}/VoyantServer.zip"
 
