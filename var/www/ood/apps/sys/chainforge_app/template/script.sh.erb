@@ -23,7 +23,7 @@ module --force purge
 export PATH=/usr/bin:/bin:/usr/local/bin:$PATH
 PY=/usr/bin/python3
 # $SCRATCH is normally set by CCconfig; keep a fallback in case the purge cleared it.
-export SCRATCH="${SCRATCH:-/scratch/$(whoami)}"
+export SCRATCH="/home/${USER}/venv"
 
 VENV="${SCRATCH}/chainforge/sysvenv"
 
